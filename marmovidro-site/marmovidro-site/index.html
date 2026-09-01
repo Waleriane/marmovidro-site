@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marmovidro — Pesquisa de Satisfação</title>
+<meta name="description" content="Marmovidro — Marmoraria e Vidraçaria. Conte como foi sua experiência.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy-950: #050e1f;
+  --navy-900: #0a1830;
+  --navy-800: #0f2245;
+  --navy-700: #16305e;
+  --blue-500: #1e6fe8;
+  --blue-400: #3b8bfa;
+  --cyan-400: #35d6f0;
+  --cyan-300: #7fe6f7;
+  --silver-300: #cfd7e3;
+  --silver-500: #9aa7bd;
+  --white: #f7f9fc;
+  --success: #2fd189;
+  --danger: #ff6b6b;
+  --wa-green: #25d366;
+  --surface-card: linear-gradient(180deg, rgba(20, 40, 74, 0.85) 0%, rgba(10, 22, 45, 0.9) 100%);
+  --surface-glass-border: rgba(125, 200, 255, 0.16);
+  --font-display: "Manrope", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
+  --shadow-soft: 0 12px 40px rgba(2, 8, 20, 0.45);
+  --shadow-glow: 0 0 0 1px rgba(125, 200, 255, 0.12), 0 8px 30px rgba(30, 111, 232, 0.18);
+  --transition: 180ms cubic-bezier(.4, 0, .2, 1);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: var(--font-body);
+  background: radial-gradient(ellipse at top, var(--navy-800) 0%, var(--navy-950) 65%);
+  color: var(--white); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5;
+}
+h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; color: var(--white); }
+p { margin: 0; color: var(--silver-300); }
+a { color: var(--cyan-400); text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { font-family: var(--font-body); cursor: pointer; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--cyan-400); outline-offset: 3px; border-radius: var(--radius-sm);
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+.bg-facets { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.bg-facets::before, .bg-facets::after { content: ""; position: absolute; border: 1px solid rgba(61, 214, 255, 0.08); transform: rotate(18deg); }
+.bg-facets::before { width: 620px; height: 620px; top: -220px; right: -180px; border-radius: 40px; }
+.bg-facets::after { width: 420px; height: 420px; bottom: -160px; left: -140px; border-radius: 32px; border-color: rgba(30, 111, 232, 0.1); }
+
+.view { display: none; }
+.view.is-active { display: block; }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 620ms cubic-bezier(.16,1,.3,1), transform 620ms cubic-bezier(.16,1,.3,1); }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+.page-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 var(--space-4) var(--space-8); }
+.brand-header { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-6); text-align: center; }
+.logo-img { height: 34px; width: auto; display: block; }
+.brand-tagline { font-size: 0.8125rem; color: var(--silver-500); }
+
+.card { width: 100%; max-width: 560px; background: var(--surface-card); border: 1px solid var(--surface-glass-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-soft), var(--shadow-glow); padding: var(--space-6); backdrop-filter: blur(14px); }
+.card + .card { margin-top: var(--space-5); }
+.section-title { font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-2); }
+.section-lead { font-size: 0.9375rem; color: var(--silver-300); margin-bottom: var(--space-5); }
+.section-eyebrow { font-size: 0.8125rem; letter-spacing: 0.04em; color: var(--cyan-300); font-weight: 600; margin-bottom: var(--space-2); display: block; }
+
+/* ---------- Layout de duas colunas da avaliação (formulário + painel lateral) ---------- */
+.avaliacao-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-6); align-items: start; }
+.form-column { max-width: none !important; width: 100%; }
+.side-column { max-width: none !important; width: 100%; position: sticky; top: var(--space-5); }
+.hero-img { width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--surface-glass-border); margin-bottom: var(--space-5); }
+.side-title { font-size: 1.125rem; font-weight: 800; line-height: 1.25; margin-bottom: var(--space-5); }
+.side-title span { display: block; color: var(--cyan-300); }
+.spec-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.spec-item { display: flex; gap: var(--space-3); padding: var(--space-3); background: rgba(255,255,255,0.03); border-radius: var(--radius-md); border: 1px solid var(--surface-glass-border); align-items: flex-start; }
+.spec-num { background: linear-gradient(150deg, var(--blue-500), var(--cyan-400)); color: var(--navy-950); width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; border-radius: 9px; font-weight: 800; font-family: var(--font-display); font-size: 0.8125rem; }
+.spec-txt h3 { font-size: 0.8125rem; margin: 0 0 3px; color: var(--cyan-300); text-transform: uppercase; letter-spacing: 0.02em; }
+.spec-txt p { font-size: 0.8125rem; margin: 0; color: var(--silver-500); line-height: 1.4; }
+.side-tag { margin-top: var(--space-5); font-size: 0.6875rem; color: var(--silver-500); text-align: center; letter-spacing: 0.12em; }
+
+.rating-block { text-align: left; margin-bottom: var(--space-5); }
+.rating-block:last-of-type { margin-bottom: var(--space-6); }
+.rating-question-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap; }
+.rating-question { font-size: 0.9375rem; font-weight: 600; color: var(--white); max-width: 34ch; }
+.rating-feedback { font-size: 0.75rem; font-weight: 700; color: var(--cyan-300); opacity: 0; transform: translateY(-2px); transition: opacity 260ms ease, transform 260ms ease; }
+.rating-feedback.is-visible { opacity: 1; transform: translateY(0); }
+.rating-scale { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; position: relative; }
+.rating-track { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.06); margin-bottom: 4px; position: relative; overflow: hidden; }
+.rating-track-fill { position: absolute; inset: 0; width: 0%; border-radius: 2px; background: linear-gradient(90deg, var(--blue-500), var(--cyan-400)); transition: width 320ms cubic-bezier(.4,0,.2,1); }
+.rating-btn { appearance: none; border: 1px solid rgba(154, 167, 189, 0.28); background: rgba(255, 255, 255, 0.03); color: var(--silver-300);
+  border-radius: 50%; aspect-ratio: 1; width: 100%; font-size: 0.8125rem; font-weight: 700; font-family: var(--font-display);
+  transition: border-color var(--transition), background var(--transition), color var(--transition), transform 220ms cubic-bezier(.34,1.56,.64,1), box-shadow var(--transition); position: relative; }
+.rating-btn:hover { border-color: rgba(61, 214, 255, 0.55); color: var(--white); transform: translateY(-2px) scale(1.05); }
+.rating-btn.is-selected { background: linear-gradient(150deg, var(--blue-500), var(--cyan-400)); border-color: transparent; color: var(--navy-950);
+  box-shadow: 0 8px 22px rgba(53, 214, 240, 0.4), 0 0 0 3px rgba(53, 214, 240, 0.16); }
+.rating-btn.is-selected.is-pulsing { animation: rating-pulse 480ms cubic-bezier(.34,1.56,.64,1); }
+@keyframes rating-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.28); } 100% { transform: scale(1.08); } }
+.rating-scale-labels { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--silver-500); margin-top: var(--space-1); }
+.rating-block.has-error .rating-scale { box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.4); border-radius: 16px; padding: 6px; }
+.rating-error { display: none; color: var(--danger); font-size: 0.8125rem; margin-top: var(--space-2); }
+.rating-block.has-error .rating-error { display: block; }
+
+.field { margin-bottom: var(--space-5); }
+.field label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--white); margin-bottom: var(--space-2); }
+.field .hint { font-size: 0.8125rem; color: var(--silver-500); margin-top: var(--space-1); }
+.field input[type="text"], .field input[type="tel"], .field input[type="email"], .field input[type="password"], .field textarea {
+  width: 100%; background: rgba(5, 14, 31, 0.55); border: 1px solid rgba(154, 167, 189, 0.25); border-radius: var(--radius-sm);
+  padding: 13px 14px; color: var(--white); font-size: 0.9375rem; font-family: var(--font-body); transition: border-color var(--transition), box-shadow var(--transition); }
+.field input::placeholder, .field textarea::placeholder { color: var(--silver-500); }
+.field input:focus, .field textarea:focus { border-color: var(--cyan-400); box-shadow: 0 0 0 3px rgba(53, 214, 240, 0.15); outline: none; }
+.field textarea { resize: vertical; min-height: 96px; }
+.field-error { display: none; color: var(--danger); font-size: 0.8125rem; margin-top: var(--space-1); }
+.field.has-error .field-error { display: block; }
+
+.upload-zone { border: 1.5px dashed rgba(125, 200, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-5); text-align: center;
+  background: rgba(255, 255, 255, 0.02); transition: border-color var(--transition), background var(--transition); }
+.upload-zone.is-dragover { border-color: var(--cyan-400); background: rgba(53, 214, 240, 0.06); }
+.upload-btn { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(53, 214, 240, 0.1);
+  border: 1px solid rgba(53, 214, 240, 0.35); color: var(--cyan-300); font-weight: 600; font-size: 0.875rem; padding: 10px 18px;
+  border-radius: 999px; margin-top: var(--space-3); transition: background var(--transition), transform var(--transition); }
+.upload-btn:hover { background: rgba(53, 214, 240, 0.18); transform: translateY(-1px); }
+.upload-note { font-size: 0.75rem; color: var(--silver-500); margin-top: var(--space-3); }
+.photo-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: var(--space-2); margin-top: var(--space-4); }
+.photo-thumb { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid rgba(125, 200, 255, 0.2); animation: pop-in 220ms ease; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb .remove-photo { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(5, 14, 31, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--white); font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+.upload-error { color: var(--danger); font-size: 0.8125rem; margin-top: var(--space-2); display: none; }
+.upload-error.is-visible { display: block; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: none; border-radius: var(--radius-sm);
+  padding: 15px 24px; font-size: 0.9375rem; font-weight: 700; font-family: var(--font-body); transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition); }
+.btn-primary { width: 100%; background: linear-gradient(120deg, var(--blue-500), var(--cyan-400)); color: var(--navy-950); box-shadow: 0 10px 30px rgba(30, 111, 232, 0.35); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 34px rgba(30, 111, 232, 0.45); }
+.btn-primary:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+.btn-secondary { width: 100%; background: transparent; border: 1px solid rgba(154, 167, 189, 0.3); color: var(--white); }
+.btn-secondary:hover { border-color: var(--cyan-400); color: var(--cyan-300); }
+.btn-ghost { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(154, 167, 189, 0.2); color: var(--silver-300); padding: 10px 16px; font-size: 0.8125rem; border-radius: 999px; }
+.btn-ghost:disabled { opacity: 0.35; cursor: default; }
+.btn-danger { border-color: rgba(255, 107, 107, 0.35); color: var(--danger); }
+.btn-danger:hover { background: rgba(255, 107, 107, 0.1); border-color: var(--danger); }
+.row-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(5, 14, 31, 0.3); border-top-color: var(--navy-950); animation: spin 700ms linear infinite; display: none; }
+.is-loading .spinner { display: inline-block; }
+.is-loading .btn-label { opacity: 0.85; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.form-footer-note { text-align: center; font-size: 0.75rem; color: var(--silver-500); margin-top: var(--space-5); }
+
+.avaliacao-success { display: none; text-align: center; }
+.avaliacao-success.is-active { display: block; }
+.success-icon { width: 76px; height: 76px; margin: 0 auto var(--space-5); border-radius: 50%;
+  background: radial-gradient(circle, rgba(47, 209, 137, 0.18), transparent 70%); display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(47, 209, 137, 0.4); animation: success-in 420ms cubic-bezier(.34,1.56,.64,1); }
+@keyframes success-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+.success-icon svg { stroke: var(--success); }
+.share-row { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
+.share-row .btn { flex: 1; }
+
+.login-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
+
+.social-row { display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin-top: var(--space-4); }
+.social-btn { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(154,167,189,0.22); color: var(--silver-300);
+  transition: transform var(--transition), border-color var(--transition), color var(--transition), background var(--transition); }
+.social-btn:hover { transform: translateY(-2px); border-color: var(--cyan-400); color: var(--cyan-300); background: rgba(53,214,240,0.08); }
+.social-btn svg { width: 18px; height: 18px; }
+
+.whatsapp-fab { position: fixed; right: 20px; bottom: 20px; z-index: 60; width: 58px; height: 58px; border-radius: 50%;
+  background: var(--wa-green); border: none; color: var(--white); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.45); transition: transform var(--transition), box-shadow var(--transition); }
+.whatsapp-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 32px rgba(37, 211, 102, 0.55); }
+.whatsapp-fab svg { width: 28px; height: 28px; }
+.whatsapp-fab::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(37, 211, 102, 0.55); animation: wa-ring 2400ms ease-out infinite; }
+@keyframes wa-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.55); opacity: 0; } }
+
+.hero-section { width: 100%; max-width: 1180px; margin: 0 auto var(--space-7); display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--space-7);
+  align-items: center; padding-top: var(--space-7); }
+.hero-copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+.hero-copy .logo-img { height: 56px; }
+.hero-eyebrow { font-size: 0.8125rem; letter-spacing: 0.04em; color: var(--cyan-300); font-weight: 600; }
+.hero-title { font-size: clamp(1.75rem, 3.4vw, 2.5rem); font-weight: 800; line-height: 1.12; }
+.hero-desc { font-size: 1rem; color: var(--silver-300); max-width: 46ch; }
+.hero-cta-row { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-2); }
+.hero-cta-row .btn { width: auto; padding: 14px 26px; }
+.hero-gallery { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.hero-gallery img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); border: 1px solid rgba(125, 200, 255, 0.18); box-shadow: var(--shadow-soft); transition: transform 420ms cubic-bezier(.16,1,.3,1); }
+.hero-gallery img:hover { transform: translateY(-4px); }
+.hero-gallery .tile-a { aspect-ratio: 3/4; align-self: end; object-position: center 30%; }
+.hero-gallery .tile-b { aspect-ratio: 3/4; margin-top: var(--space-6); object-position: center 20%; }
+.hero-gallery .tile-glow { position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(53,214,240,0.16), transparent 70%); z-index: -1; }
+
+.feature-bar { width: 100%; max-width: 1000px; margin: 0 auto var(--space-7); display: flex; justify-content: center; gap: var(--space-6) var(--space-7); flex-wrap: wrap; padding: var(--space-4) 0; }
+.feature-item { display: flex; align-items: center; gap: var(--space-3); }
+.feature-item .icon-wrap { width: 40px; height: 40px; border-radius: 12px; background: rgba(53, 214, 240, 0.1); border: 1px solid rgba(53,214,240,0.3);
+  display: flex; align-items: center; justify-content: center; color: var(--cyan-300); flex-shrink: 0; }
+.feature-item span { font-size: 0.875rem; font-weight: 600; color: var(--silver-300); white-space: nowrap; }
+
+.gallery-strip-title { width: 100%; max-width: 1000px; margin: 0 auto var(--space-4); text-align: center; }
+.gallery-mosaic { width: 100%; max-width: 900px; margin: 0 auto var(--space-7); display: grid;
+  grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.gallery-mosaic img { width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--surface-glass-border);
+  transition: transform var(--transition), border-color var(--transition); }
+.gallery-mosaic img:hover { transform: scale(1.02); border-color: rgba(53,214,240,0.4); }
+
+.wall-section { width: 100%; max-width: 760px; margin: 0 auto var(--space-7); }
+.wall-header { text-align: center; margin-bottom: var(--space-5); }
+.testimonial-wall { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.testimonial-card { background: var(--surface-card); border: 1px solid var(--surface-glass-border);
+  border-radius: var(--radius-md); padding: var(--space-4); box-shadow: var(--shadow-soft); }
+.testimonial-card.is-new { animation: testimonial-in 560ms cubic-bezier(.16,1,.3,1); }
+@keyframes testimonial-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.testimonial-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+.testimonial-name { font-size: 0.9375rem; font-weight: 700; color: var(--white); }
+.testimonial-date { font-size: 0.75rem; color: var(--silver-500); }
+.testimonial-score { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; padding: 3px 8px; border-radius: 999px;
+  font-weight: 700; font-size: 0.8125rem; background: rgba(53, 214, 240, 0.12); color: var(--cyan-300); }
+.testimonial-comment { font-size: 0.875rem; color: var(--silver-300); margin-bottom: var(--space-3); }
+.testimonial-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+.testimonial-photos img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(125,200,255,0.18); }
+.wall-empty { text-align: center; color: var(--silver-500); font-size: 0.875rem; padding: var(--space-6) 0; }
+
+.location-band { width: 100%; background: var(--navy-900); border-top: 1px solid rgba(125,200,255,0.1); border-bottom: 1px solid rgba(125,200,255,0.1); padding: var(--space-7) var(--space-4); margin-bottom: var(--space-6); }
+.location-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: center; }
+.map-placeholder { height: 220px; border-radius: var(--radius-md); background: repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 10px, rgba(255,255,255,0.035) 10px 20px);
+  border: 1px dashed rgba(125, 200, 255, 0.25); display: flex; align-items: center; justify-content: center; color: var(--silver-500); font-size: 0.8125rem; text-align: center; padding: var(--space-4); }
+
+.institutional-footer { text-align: center; color: var(--silver-500); font-size: 0.8125rem; margin-top: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+
+.admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar { background: linear-gradient(180deg, var(--navy-900), var(--navy-950)); border-right: 1px solid rgba(125, 200, 255, 0.1); padding: var(--space-5) var(--space-4); display: flex; flex-direction: column; }
+.sidebar-brand { display: flex; align-items: center; margin-bottom: var(--space-7); padding: 0 var(--space-2); }
+.sidebar-brand .logo-img { height: 30px; }
+.nav-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.nav-link { display: flex; align-items: center; gap: var(--space-3); padding: 11px var(--space-3); border-radius: 10px; color: var(--silver-300);
+  font-size: 0.875rem; font-weight: 600; transition: background var(--transition), color var(--transition); width: 100%; background: none; border: none; text-align: left; }
+.nav-link:hover { background: rgba(255, 255, 255, 0.04); color: var(--white); }
+.nav-link.is-active { background: linear-gradient(120deg, rgba(30, 111, 232, 0.25), rgba(53, 214, 240, 0.14)); color: var(--white); box-shadow: inset 0 0 0 1px rgba(53, 214, 240, 0.25); }
+.nav-link .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0; }
+.nav-link.is-active .dot { opacity: 1; color: var(--cyan-400); }
+.sidebar-footer { margin-top: auto; }
+.main-content { padding: var(--space-6) var(--space-7); max-width: 1200px; }
+.content-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3); }
+.content-header h1 { font-size: 1.625rem; margin-bottom: 4px; }
+.mobile-topbar { display: none; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+.stat-card { background: var(--surface-card); border: 1px solid var(--surface-glass-border); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: var(--shadow-soft); }
+.stat-label { font-size: 0.75rem; color: var(--silver-500); font-weight: 600; margin-bottom: var(--space-2); }
+.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--white); }
+.panel { background: var(--surface-card); border: 1px solid var(--surface-glass-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-soft); margin-bottom: var(--space-6); }
+.panel-title { font-size: 1.0625rem; font-weight: 700; margin-bottom: var(--space-4); }
+.category-row { margin-bottom: var(--space-4); }
+.category-row:last-child { margin-bottom: 0; }
+.category-row-head { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 6px; }
+.category-row-head span:first-child { color: var(--silver-300); font-weight: 600; }
+.category-row-head span:last-child { color: var(--white); font-weight: 700; }
+.bar-track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue-500), var(--cyan-400)); width: 0; transition: width 900ms cubic-bezier(.4,0,.2,1); }
+.filters-row { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-5); }
+.filters-row select, .filters-row input[type="search"] { background: rgba(5, 14, 31, 0.55); border: 1px solid rgba(154, 167, 189, 0.25); color: var(--white); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.8125rem; font-family: var(--font-body); }
+.filters-row input[type="search"] { flex: 1; min-width: 180px; }
+.reviews-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.reviews-table th { text-align: left; color: var(--silver-500); font-weight: 600; font-size: 0.75rem; padding: 10px 12px; border-bottom: 1px solid rgba(154, 167, 189, 0.15); }
+.reviews-table td { padding: 12px; border-bottom: 1px solid rgba(154, 167, 189, 0.08); color: var(--silver-300); }
+.reviews-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+.score-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 4px 8px; border-radius: 999px; font-weight: 700; font-size: 0.8125rem; background: rgba(53, 214, 240, 0.12); color: var(--cyan-300); }
+.reviews-cards { display: none; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5); }
+.detail-score-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(154, 167, 189, 0.15); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; }
+.detail-score-card .value { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: var(--cyan-300); }
+.detail-score-card .label { font-size: 0.75rem; color: var(--silver-500); margin-top: 4px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-3); }
+.gallery-grid img { border-radius: var(--radius-sm); border: 1px solid rgba(154, 167, 189, 0.15); aspect-ratio: 1; object-fit: cover; }
+.share-link-row { display: flex; gap: var(--space-3); align-items: center; background: rgba(5, 14, 31, 0.5); border: 1px solid rgba(154, 167, 189, 0.2); border-radius: var(--radius-sm); padding: var(--space-3); flex-wrap: wrap; }
+.share-link-row code { flex: 1; min-width: 200px; color: var(--cyan-300); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--navy-800); border: 1px solid rgba(53, 214, 240, 0.3); color: var(--white);
+  padding: 12px 20px; border-radius: 999px; font-size: 0.8125rem; font-weight: 600; box-shadow: var(--shadow-soft); opacity: 0; pointer-events: none; transition: opacity 220ms ease, transform 220ms ease; z-index: 70; }
+.toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 899px) {
+  .hero-section { grid-template-columns: 1fr; text-align: center; padding-top: var(--space-6); }
+  .hero-copy { align-items: center; }
+  .hero-cta-row { justify-content: center; }
+  .hero-gallery { max-width: 420px; margin: 0 auto; }
+  .testimonial-wall { grid-template-columns: 1fr 1fr; }
+  .location-inner { grid-template-columns: 1fr; text-align: center; }
+  .avaliacao-layout { grid-template-columns: 1fr; }
+  .side-column { position: static; order: -1; }
+}
+@media (max-width: 599px) {
+  .rating-scale { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .rating-btn { font-size: 1rem; }
+  .card { padding: var(--space-5) var(--space-4); border-radius: var(--radius-md); }
+  .share-row { flex-direction: column; }
+  .feature-bar { gap: var(--space-4); }
+  .feature-item span { font-size: 0.8125rem; }
+  .gallery-mosaic { grid-template-columns: 1fr; }
+  .gallery-mosaic img { height: 220px; }
+  .admin-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4); background: var(--navy-900); border-bottom: 1px solid rgba(125, 200, 255, 0.1); position: sticky; top: 0; z-index: 30; }
+  .mobile-topbar .sidebar-brand { margin: 0; font-size: 1rem; }
+  .mobile-menu-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(154,167,189,0.25); color: var(--white); border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+  .sidebar.is-open { display: flex; position: fixed; inset: 0 15% 0 0; z-index: 40; box-shadow: 20px 0 40px rgba(0,0,0,0.5); }
+  .sidebar-scrim { display: none; position: fixed; inset: 0; background: rgba(2, 6, 16, 0.6); z-index: 35; }
+  .sidebar-scrim.is-visible { display: block; }
+  .main-content { padding: var(--space-5) var(--space-4); }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+  .stat-value { font-size: 1.5rem; }
+  .testimonial-wall { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr 1fr; }
+  .reviews-table { display: none; }
+  .reviews-cards { display: flex; flex-direction: column; gap: var(--space-3); }
+  .review-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(154,167,189,0.15); border-radius: var(--radius-md); padding: var(--space-4); }
+  .review-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+  .review-card-head strong { color: var(--white); font-size: 0.9375rem; }
+  .review-card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8125rem; color: var(--silver-500); margin-bottom: var(--space-3); }
+  .review-card-meta span { color: var(--silver-300); }
+  .review-card .btn-ghost { width: 100%; text-align: center; justify-content: center; }
+  .whatsapp-fab { width: 52px; height: 52px; right: 14px; bottom: 14px; }
+}
+@media (min-width: 600px) and (max-width: 899px) {
+  .admin-layout { grid-template-columns: 84px 1fr; }
+  .sidebar { padding: var(--space-5) var(--space-2); align-items: center; }
+  .sidebar-brand { display: none; }
+  .nav-link span.label { display: none; }
+  .nav-link { justify-content: center; padding: 12px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .main-content { padding: var(--space-5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="bg-facets" aria-hidden="true"></div>
+
+<section class="view is-active" id="view-home">
+  <main class="page-shell">
+
+    <section class="hero-section reveal">
+      <div class="hero-copy">
+        <img src="assets/logo.png" alt="Marmovidro" class="logo-img">
+        <p class="hero-eyebrow">Marmoraria e Vidraçaria</p>
+        <h1 class="hero-title">Qualidade que transforma ambientes</h1>
+        <p class="hero-desc">Mármores, granitos, vidros temperados e acabamentos sob medida — com o mesmo padrão premium em cada projeto entregue.</p>
+        <div class="hero-cta-row">
+          <button type="button" class="btn btn-primary" onclick="scrollToId('avaliacao-section')">Avaliar meu atendimento</button>
+        </div>
+        <div class="social-row" style="justify-content: flex-start; margin-top: var(--space-3);" id="home-social-row"></div>
+      </div>
+      <div class="hero-gallery">
+        <div class="tile-glow" aria-hidden="true"></div>
+        <img class="tile-a" src="https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=700&auto=format&fit=crop&q=70" alt="Cozinha com bancada de mármore preto Marmovidro">
+        <img class="tile-b" src="https://images.unsplash.com/photo-1771929662486-f793e08f0f16?w=700&auto=format&fit=crop&q=70" alt="Box de vidro temperado em banheiro moderno">
+      </div>
+    </section>
+
+    <section class="reveal" id="avaliacao-section" style="width: 100%; max-width: 1000px; margin: 0 auto var(--space-7);">
+      <div class="avaliacao-layout">
+
+        <div class="card form-column">
+          <div id="avaliacao-form-wrap">
+            <span class="section-eyebrow">Sua opinião é muito importante para nós</span>
+            <h2 class="section-title">Como foi sua experiência com a Marmovidro?</h2>
+            <p class="section-lead">Leva menos de 1 minuto.</p>
+
+            <form id="review-form" novalidate>
+
+              <div class="rating-block">
+                <div class="rating-question-row">
+                  <span class="rating-question" id="q-quality">Como você avalia o resultado final do serviço?</span>
+                  <span class="rating-feedback" data-feedback-for="quality_score"></span>
+                </div>
+                <div class="rating-scale" data-field="quality_score" role="group" aria-labelledby="q-quality"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                <p class="rating-error" role="alert">Selecione uma nota.</p>
+              </div>
+
+              <div class="rating-block">
+                <div class="rating-question-row">
+                  <span class="rating-question" id="q-overall">De 1 a 10, qual nota você dá para sua experiência com a Marmovidro?</span>
+                  <span class="rating-feedback" data-feedback-for="overall_score"></span>
+                </div>
+                <div class="rating-scale" data-field="overall_score" role="group" aria-labelledby="q-overall"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                <p class="rating-error" role="alert">Selecione uma nota.</p>
+              </div>
+
+              <div class="field">
+                <label for="customer-comment">Conte um pouco sobre sua experiência</label>
+                <textarea id="customer-comment" placeholder="Seu comentário ou sugestão..."></textarea>
+              </div>
+
+              <div class="field">
+                <label id="upload-label">Quer compartilhar o resultado?</label>
+                <p class="hint" style="margin-bottom: 12px;">Envie uma ou mais fotos do serviço realizado.</p>
+                <div class="upload-zone" id="upload-zone" aria-labelledby="upload-label">
+                  <p style="font-size: 0.875rem; color: var(--silver-300);">Arraste as fotos aqui ou</p>
+                  <button type="button" class="upload-btn" id="upload-trigger"><span aria-hidden="true">+</span> Adicionar fotos</button>
+                  <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                  <p class="upload-note">JPG, PNG ou WEBP · até 5 fotos</p>
+                  <p class="upload-error" id="upload-error" role="alert"></p>
+                </div>
+                <div class="photo-preview-grid" id="photo-preview-grid"></div>
+              </div>
+
+              <div class="field">
+                <label for="customer-name">Nome</label>
+                <input type="text" id="customer-name" placeholder="Seu nome completo" autocomplete="name">
+                <p class="field-error" role="alert">Informe seu nome.</p>
+              </div>
+
+              <div class="field">
+                <label for="customer-phone">Telefone <span style="color: var(--silver-500); font-weight: 400;">(opcional)</span></label>
+                <input type="tel" id="customer-phone" placeholder="(69) 9 9999-9999" autocomplete="tel">
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="submit-btn">
+                <span class="spinner" aria-hidden="true"></span>
+                <span class="btn-label">Enviar avaliação</span>
+              </button>
+              <p class="form-footer-note">Seus dados são usados apenas para acompanhar a qualidade do nosso atendimento.</p>
+            </form>
+          </div>
+
+          <div class="avaliacao-success" id="avaliacao-success">
+            <div class="success-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            <h2 class="section-title">Obrigado pela sua avaliação!</h2>
+            <p class="section-lead">Sua opinião já está registrada e apareceu no mural de depoimentos abaixo.</p>
+            <p style="font-weight: 600; color: var(--white); margin-bottom: 16px;">Gostaria de compartilhar sua experiência?</p>
+            <div class="share-row">
+              <button type="button" class="btn btn-secondary" id="share-btn">Compartilhar avaliação</button>
+              <button type="button" class="btn btn-secondary" id="copy-link-btn">Copiar link</button>
+            </div>
+            <div style="margin-top: 20px;">
+              <button type="button" class="btn btn-primary" onclick="scrollToId('depoimentos')">Ver meu depoimento</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card side-column">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=600&auto=format&fit=crop&q=70" alt="Cozinha com bancada de mármore Marmovidro">
+          <div class="side-title">Qualidade <span>que você pode confiar</span></div>
+          <div class="spec-list">
+            <div class="spec-item">
+              <div class="spec-num">01</div>
+              <div class="spec-txt"><h3>Qualidade</h3><p>Materiais selecionados e acabamento impecável em cada projeto.</p></div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-num">02</div>
+              <div class="spec-txt"><h3>Pontualidade</h3><p>Cumprimos os prazos combinados, sem surpresas.</p></div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-num">03</div>
+              <div class="spec-txt"><h3>Garantia</h3><p>Suporte após a instalação para sua tranquilidade.</p></div>
+            </div>
+          </div>
+          <div class="side-tag">MARMOVIDRO ®</div>
+        </aside>
+
+      </div>
+    </section>
+
+    <div class="feature-bar reveal">
+      <div class="feature-item">
+        <div class="icon-wrap" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="1"></rect></svg></div>
+        <span>Mármores e granitos</span>
+      </div>
+      <div class="feature-item">
+        <div class="icon-wrap" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg></div>
+        <span>Vidros temperados</span>
+      </div>
+      <div class="feature-item">
+        <div class="icon-wrap" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"></circle></svg></div>
+        <span>Box para banheiro</span>
+      </div>
+      <div class="feature-item">
+        <div class="icon-wrap" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.5 5.5L20 9l-4 4 1 5.5-5-3-5 3 1-5.5-4-4 5.5-.5L12 3z"></path></svg></div>
+        <span>Espelhos sob medida</span>
+      </div>
+    </div>
+
+    <p class="gallery-strip-title reveal"><span class="section-title" style="font-size: 1.125rem;">Alguns projetos entregues</span></p>
+    <div class="gallery-mosaic reveal">
+      <img src="assets/foto-banheiro-bancada.jpg" alt="Bancada de banheiro em porcelanato marmorizado - Marmovidro">
+      <img src="assets/foto-lavanderia-cuba.jpg" alt="Bancada de lavanderia com cuba em inox - Marmovidro">
+    </div>
+
+    <section class="wall-section reveal" id="depoimentos">
+      <div class="wall-header">
+        <span class="section-eyebrow">Depoimentos</span>
+        <h2 class="section-title">O que nossos clientes dizem</h2>
+      </div>
+      <div class="testimonial-wall" id="testimonial-wall"></div>
+    </section>
+  </main>
+
+  <div class="location-band reveal">
+    <div class="location-inner">
+      <div>
+        <span class="section-eyebrow">Onde estamos</span>
+        <h2 class="section-title" style="font-size: 1.375rem;">Nossa localização</h2>
+        <p class="section-lead">Atendimento em Tarilândia, Jaru, Urupá, Ouro Preto e Mirante da Serra.</p>
+        <p style="font-size: 0.8125rem; color: var(--silver-500); margin-top: var(--space-3);">
+          <a href="https://maps.app.goo.gl/H7qDy8fLbQKTZcJb8" target="_blank" rel="noopener">Ver no Google Maps ↗</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:marmovidro9@gmail.com">marmovidro9@gmail.com</a>
+        </p>
+      </div>
+      <!-- Embed gerado a partir do link do Google Maps enviado pelo cliente (sem necessidade de chave de API) -->
+      <iframe class="map-embed" src="https://www.google.com/maps?q=-10.8514816,-62.793757&z=16&output=embed"
+        width="100%" height="220" style="border:0; border-radius: var(--radius-md);" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade" title="Localização da Marmovidro no Google Maps"></iframe>
+    </div>
+  </div>
+
+  <div class="institutional-footer reveal">
+    <div class="social-row" id="footer-social-row"></div>
+    <p>Marmovidro · Marmoraria e Vidraçaria</p>
+  </div>
+</section>
+
+<section class="view" id="view-login">
+  <main class="login-shell">
+    <section class="card" style="max-width: 400px;">
+      <header class="brand-header" style="margin-bottom: 28px;"><img src="assets/logo.png" alt="Marmovidro" class="logo-img"></header>
+      <h1 class="section-title" style="text-align:center;">Área administrativa</h1>
+      <p class="section-lead" style="text-align:center;">Acesse o painel para acompanhar as avaliações dos clientes.</p>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" placeholder="seuemail@marmovidro.com.br" autocomplete="username">
+          <p class="field-error" role="alert">Informe seu e-mail.</p>
+        </div>
+        <div class="field">
+          <label for="login-password">Senha</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+          <p class="field-error" role="alert">Informe sua senha.</p>
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-btn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label">Entrar</span>
+        </button>
+      </form>
+      <p class="form-footer-note"><a href="#" onclick="showView('home'); location.hash=''; return false;">Voltar ao site</a></p>
+    </section>
+  </main>
+</section>
+
+<section class="view" id="view-dashboard">
+  <div class="mobile-topbar">
+    <div class="sidebar-brand"><img src="assets/logo.png" alt="Marmovidro" class="logo-img"></div>
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+  </div>
+  <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.png" alt="Marmovidro" class="logo-img"></div>
+      <nav aria-label="Navegação do painel">
+        <ul class="nav-list">
+          <li><button class="nav-link is-active" onclick="scrollDashTo('topo')"><span class="dot"></span><span class="label">Dashboard</span></button></li>
+          <li><button class="nav-link" onclick="scrollDashTo('avaliacoes')"><span class="dot"></span><span class="label">Avaliações</span></button></li>
+          <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Clientes</span></button></li>
+          <li><button class="nav-link" onclick="scrollDashTo('relatorios')"><span class="dot"></span><span class="label">Relatórios</span></button></li>
+          <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Configurações</span></button></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-link" onclick="showView('login'); location.hash='admin';"><span class="dot"></span><span class="label">Sair</span></button>
+      </div>
+    </aside>
+
+    <main class="main-content" id="dash-topo">
+      <div class="content-header">
+        <div><h1>Olá, Marmovidro</h1><p>Acompanhe a experiência dos seus clientes.</p></div>
+      </div>
+
+      <section class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Avaliação média</div><div class="stat-value" id="stat-average">–</div></div>
+        <div class="stat-card"><div class="stat-label">Total de avaliações</div><div class="stat-value" id="stat-total">–</div></div>
+        <div class="stat-card"><div class="stat-label">Fotos recebidas</div><div class="stat-value" id="stat-photos">–</div></div>
+        <div class="stat-card"><div class="stat-label">Avaliações este mês</div><div class="stat-value" id="stat-month">–</div></div>
+      </section>
+
+      <section class="panel" id="dash-relatorios">
+        <h2 class="panel-title">Desempenho por categoria</h2>
+        <div id="category-bars"></div>
+      </section>
+
+      <section class="panel" id="dash-avaliacoes">
+        <h2 class="panel-title">Últimas avaliações</h2>
+        <div class="filters-row">
+          <input type="search" id="search-input" placeholder="Buscar por nome do cliente..." aria-label="Buscar por nome do cliente">
+          <select id="filter-period" aria-label="Filtrar por período">
+            <option value="all">Todo o período</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+          </select>
+          <select id="filter-score" aria-label="Filtrar por nota mínima">
+            <option value="all">Qualquer nota</option>
+            <option value="9">A partir de 9</option>
+            <option value="7">A partir de 7</option>
+            <option value="5">A partir de 5</option>
+          </select>
+          <select id="filter-photos" aria-label="Filtrar por presença de fotos">
+            <option value="all">Com ou sem fotos</option>
+            <option value="with">Com fotos</option>
+            <option value="without">Sem fotos</option>
+          </select>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="reviews-table">
+            <thead><tr><th>Cliente</th><th>Nota</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
+            <tbody id="reviews-tbody"></tbody>
+          </table>
+        </div>
+        <div class="reviews-cards" id="reviews-cards"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">Compartilhar pesquisa</h2>
+        <p class="section-lead" style="margin-bottom: 16px;">Envie o link da pesquisa de satisfação para o seu cliente.</p>
+        <div class="share-link-row">
+          <code id="share-link-code">envie o link da avaliação pelo WhatsApp</code>
+          <button class="btn-ghost" id="whatsapp-share-link">Enviar por WhatsApp</button>
+          <button class="btn-ghost" id="copy-share-link">Copiar link</button>
+        </div>
+        <p class="hint" style="margin-top: 10px;">TODO: CONNECT TO SUPABASE — no futuro cada cliente receberá um link individual gerado automaticamente após o fechamento do serviço.</p>
+      </section>
+    </main>
+  </div>
+</section>
+
+<section class="view" id="view-detalhes">
+  <div class="admin-layout">
+    <aside class="sidebar" style="display:flex;">
+      <div class="sidebar-brand"><img src="assets/logo.png" alt="Marmovidro" class="logo-img"></div>
+      <nav aria-label="Navegação do painel">
+        <ul class="nav-list">
+          <li><button class="nav-link" onclick="showView('dashboard')"><span class="dot"></span><span class="label">Dashboard</span></button></li>
+          <li><button class="nav-link is-active" onclick="showView('dashboard')"><span class="dot"></span><span class="label">Avaliações</span></button></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-link" onclick="showView('login'); location.hash='admin';"><span class="dot"></span><span class="label">Sair</span></button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <div class="content-header">
+        <div><h1 id="detail-customer-name">Carregando...</h1><p>Avaliado em <span id="detail-date">–</span></p></div>
+        <div class="row-actions">
+          <button type="button" class="btn-ghost" onclick="showView('dashboard')">← Voltar para avaliações</button>
+          <button type="button" class="btn-ghost btn-danger" id="detail-delete-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg> Excluir avaliação</button>
+        </div>
+      </div>
+      <section class="panel">
+        <div class="detail-grid">
+          <div class="detail-score-card"><div class="value" id="detail-overall">–</div><div class="label">Satisfação geral</div></div>
+          <div class="detail-score-card"><div class="value" id="detail-quality">–</div><div class="label">Qualidade do serviço</div></div>
+        </div>
+        <h2 class="panel-title">Comentário</h2>
+        <p id="detail-comment" style="margin-bottom: var(--space-5);">–</p>
+        <h2 class="panel-title">Fotos enviadas</h2>
+        <div class="gallery-grid" id="detail-gallery"></div>
+      </section>
+    </main>
+  </div>
+</section>
+
+<a class="whatsapp-fab" id="whatsapp-fab" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4c-4.94 0-8.95 4-8.95 8.94a8.9 8.9 0 0 0 1.2 4.48L3 21l3.66-1.27a8.98 8.98 0 0 0 4.38 1.12h.01c4.94 0 8.95-4.01 8.95-8.95a8.9 8.9 0 0 0-2.4-6.28ZM12.05 19.4a7.42 7.42 0 0 1-3.8-1.04l-.27-.16-2.83.98.95-2.75-.18-.28a7.44 7.44 0 0 1-1.14-3.97c0-4.12 3.36-7.47 7.48-7.47a7.4 7.4 0 0 1 5.28 2.2 7.4 7.4 0 0 1 2.19 5.27c0 4.12-3.36 7.47-7.48 7.47Zm4.09-5.6c-.22-.11-1.32-.65-1.53-.73-.2-.08-.35-.11-.5.11-.15.22-.58.73-.71.88-.13.15-.26.16-.48.06-.22-.11-.94-.35-1.79-1.12a6.7 6.7 0 0 1-1.24-1.55c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.22-.69-1.67-.18-.44-.36-.38-.5-.38-.13 0-.28-.01-.43-.01a.83.83 0 0 0-.6.28c-.2.22-.79.78-.79 1.9s.81 2.2.92 2.36c.11.15 1.6 2.46 3.88 3.44.54.24.97.38 1.3.48.55.17 1.05.15 1.44.09.44-.07 1.32-.54 1.51-1.06.19-.52.19-.96.13-1.06-.06-.1-.2-.15-.43-.26Z"></path></svg>
+</a>
+
+<script>
+const TRASH_ICON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+
+const MARMOVIDRO_LINKS = {
+  instagram: "https://www.instagram.com/marmo_vidro/",
+  site: "https://sstone.lovable.app/marmovidro",
+  email: "marmovidro9@gmail.com",
+  whatsappNumber: "5569999545041",
+  whatsappMessage: "Olá! Vim pelo site da Marmovidro e gostaria de mais informações."
+};
+
+function buildWhatsappUrl(message) {
+  return `https://wa.me/${MARMOVIDRO_LINKS.whatsappNumber}?text=${encodeURIComponent(message || MARMOVIDRO_LINKS.whatsappMessage)}`;
+}
+
+function renderSocialIcons(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `
+    <a class="social-btn" href="${MARMOVIDRO_LINKS.instagram}" target="_blank" rel="noopener" aria-label="Instagram da Marmovidro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.2" cy="6.8" r="1"></circle></svg>
+    </a>
+    <a class="social-btn" href="${MARMOVIDRO_LINKS.site}" target="_blank" rel="noopener" aria-label="Site da Marmovidro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9Z"></path></svg>
+    </a>
+    <a class="social-btn" href="mailto:${MARMOVIDRO_LINKS.email}" aria-label="E-mail da Marmovidro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>
+    </a>
+    <a class="social-btn" href="${buildWhatsappUrl()}" target="_blank" rel="noopener" aria-label="WhatsApp da Marmovidro">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4c-4.94 0-8.95 4-8.95 8.94a8.9 8.9 0 0 0 1.2 4.48L3 21l3.66-1.27a8.98 8.98 0 0 0 4.38 1.12h.01c4.94 0 8.95-4.01 8.95-8.95a8.9 8.9 0 0 0-2.4-6.28ZM12.05 19.4a7.42 7.42 0 0 1-3.8-1.04l-.27-.16-2.83.98.95-2.75-.18-.28a7.44 7.44 0 0 1-1.14-3.97c0-4.12 3.36-7.47 7.48-7.47a7.4 7.4 0 0 1 5.28 2.2 7.4 7.4 0 0 1 2.19 5.27c0 4.12-3.36 7.47-7.48 7.47Z"></path></svg>
+    </a>`;
+}
+
+function scrollToId(id) {
+  document.getElementById(id).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderSocialIcons("home-social-row");
+  renderSocialIcons("footer-social-row");
+  document.getElementById("whatsapp-fab").href = buildWhatsappUrl();
+  renderTestimonials();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); io.unobserve(entry.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+  if (window.location.hash === "#admin") showView("login");
+});
+
+function showView(name) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("is-active"));
+  document.getElementById("view-" + name).classList.add("is-active");
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  if (name === "dashboard") refreshDashboard();
+}
+
+function scrollDashTo(anchor) {
+  const map = { topo: "dash-topo", avaliacoes: "dash-avaliacoes", relatorios: "dash-relatorios" };
+  document.getElementById(map[anchor]).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+const MARMOVIDRO_DB_KEY = "marmovidro_reviews_v1";
+const MARMOVIDRO_DELETED_KEY = "marmovidro_deleted_ids_v1";
+
+const SEED_REVIEWS = [
+  { id: "rev_001", customer_name: "João Silva", quality_score: 10, overall_score: 9.5,
+    comment: "Equipe muito atenciosa do início ao fim. O mármore da cozinha ficou exatamente como eu imaginava.", created_at: "2026-08-31",
+    photos: ["https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=400", "https://images.unsplash.com/photo-1771929662486-f793e08f0f16?w=400"] },
+  { id: "rev_002", customer_name: "Marina Costa", quality_score: 9, overall_score: 9.0,
+    comment: "Box do banheiro ficou perfeito, instalação rápida e limpa.", created_at: "2026-08-28",
+    photos: ["https://images.unsplash.com/photo-1771929662486-f793e08f0f16?w=400"] },
+  { id: "rev_003", customer_name: "Roberto Almeida", quality_score: 10, overall_score: 10,
+    comment: "Simplesmente perfeito, nota 10 em tudo.", created_at: "2026-08-25", photos: [] },
+  { id: "rev_004", customer_name: "Fernanda Lima", quality_score: 9, overall_score: 8.7,
+    comment: "Gostei muito do acabamento da bancada. O prazo foi um pouco apertado, mas o resultado final compensou a espera.", created_at: "2026-08-20",
+    photos: ["https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=400"] },
+  { id: "rev_005", customer_name: "Carlos Eduardo", quality_score: 10, overall_score: 9.6,
+    comment: "Espelho sob medida ficou show, equipe super pontual.", created_at: "2026-08-14",
+    photos: ["https://images.unsplash.com/photo-1564540579594-0930edb6de43?w=400"] },
+  { id: "rev_006", customer_name: "Patrícia Nogueira", quality_score: 10, overall_score: 9.7,
+    comment: "Contratei pra fechar a área de serviço com vidro e ficou muito mais bonito do que eu esperava. Equipe explicou cada etapa antes de começar, o que me deixou bem tranquila.", created_at: "2026-08-10",
+    photos: [] }
+];
+
+function loadReviews() {
+  const stored = JSON.parse(localStorage.getItem(MARMOVIDRO_DB_KEY) || "[]");
+  const deletedIds = new Set(JSON.parse(localStorage.getItem(MARMOVIDRO_DELETED_KEY) || "[]"));
+  return [...stored, ...SEED_REVIEWS]
+    .filter((r) => !deletedIds.has(r.id))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+function createReview(reviewData) {
+  const stored = JSON.parse(localStorage.getItem(MARMOVIDRO_DB_KEY) || "[]");
+  const record = { id: "rev_" + Date.now(), created_at: new Date().toISOString().slice(0, 10), ...reviewData };
+  stored.unshift(record);
+  localStorage.setItem(MARMOVIDRO_DB_KEY, JSON.stringify(stored));
+  return record;
+}
+
+/* Exclusão — válida apenas nesta fase de testes (marca como removido no localStorage).
+   TODO: CONNECT TO SUPABASE — trocar por DELETE FROM reviews WHERE id = ... */
+function deleteReview(id) {
+  const deletedIds = JSON.parse(localStorage.getItem(MARMOVIDRO_DELETED_KEY) || "[]");
+  if (!deletedIds.includes(id)) deletedIds.push(id);
+  localStorage.setItem(MARMOVIDRO_DELETED_KEY, JSON.stringify(deletedIds));
+}
+
+function calculateAverages(reviews) {
+  if (!reviews.length) return { quality: 0, overall: 0, count: 0, photosCount: 0 };
+  const sum = (key) => reviews.reduce((acc, r) => acc + Number(r[key] || 0), 0);
+  const round1 = (n) => Math.round(n * 10) / 10;
+  return {
+    quality: round1(sum("quality_score") / reviews.length),
+    overall: round1(sum("overall_score") / reviews.length),
+    count: reviews.length,
+    photosCount: reviews.reduce((acc, r) => acc + (r.photos ? r.photos.length : 0), 0)
+  };
+}
+
+async function uploadPhotos(fileList) {
+  return fileList.map((file) => URL.createObjectURL(file));
+}
+
+function showToast(message) {
+  let toast = document.querySelector(".toast");
+  if (!toast) { toast = document.createElement("div"); toast.className = "toast"; document.body.appendChild(toast); }
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove("is-visible"), 2600);
+}
+
+function formatDate(isoDate) {
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+let lastSubmittedReviewId = null;
+
+function renderTestimonials() {
+  const wall = document.getElementById("testimonial-wall");
+  if (!wall) return;
+  const reviews = loadReviews().slice(0, 12);
+
+  if (!reviews.length) {
+    wall.innerHTML = `<p class="wall-empty">Ainda não há depoimentos. Seja o primeiro a avaliar!</p>`;
+    return;
+  }
+
+  wall.innerHTML = reviews.map((r) => {
+    const comment = r.comment && r.comment.trim() ? r.comment : `Cliente avaliou o serviço com nota ${r.overall_score.toFixed(1).replace(".", ",")}.`;
+    const photosHtml = r.photos && r.photos.length
+      ? `<div class="testimonial-photos">${r.photos.slice(0, 3).map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${r.customer_name}">`).join("")}</div>`
+      : "";
+    const isNew = r.id === lastSubmittedReviewId ? " is-new" : "";
+    return `
+      <div class="testimonial-card${isNew}">
+        <div class="testimonial-head">
+          <div>
+            <div class="testimonial-name">${r.customer_name}</div>
+            <div class="testimonial-date">${formatDate(r.created_at)}</div>
+          </div>
+          <span class="testimonial-score">${r.overall_score.toFixed(1).replace(".", ",")}</span>
+        </div>
+        <p class="testimonial-comment">${comment}</p>
+        ${photosHtml}
+      </div>`;
+  }).join("");
+
+  lastSubmittedReviewId = null;
+}
+
+(function initAvaliacao() {
+  const MAX_PHOTOS = 5;
+  const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  const FEEDBACK_LABELS = [null, "Muito ruim", "Muito ruim", "Ruim", "Ruim", "Regular", "Regular", "Bom", "Bom", "Excelente", "Excelente"];
+  const scaleGroups = Array.from(document.querySelectorAll("#view-home .rating-scale"));
+  const form = document.getElementById("review-form");
+  const photoInput = document.getElementById("photo-input");
+  const uploadZone = document.getElementById("upload-zone");
+  const previewGrid = document.getElementById("photo-preview-grid");
+  const uploadError = document.getElementById("upload-error");
+  const submitBtn = document.getElementById("submit-btn");
+  const formWrap = document.getElementById("avaliacao-form-wrap");
+  const successWrap = document.getElementById("avaliacao-success");
+  let selectedFiles = [];
+
+  scaleGroups.forEach((group) => {
+    const feedback = group.closest(".rating-block").querySelector(".rating-feedback");
+    const trackFill = group.querySelector(".rating-track-fill");
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "rating-btn";
+      btn.textContent = i;
+      btn.setAttribute("aria-label", `Nota ${i} de 10`);
+      btn.addEventListener("click", () => {
+        group.querySelectorAll(".rating-btn").forEach((b) => { b.classList.remove("is-selected", "is-pulsing"); b.setAttribute("aria-pressed", "false"); });
+        btn.classList.add("is-selected", "is-pulsing");
+        btn.setAttribute("aria-pressed", "true");
+        btn.addEventListener("animationend", () => btn.classList.remove("is-pulsing"), { once: true });
+        group.dataset.selected = i;
+        if (trackFill) trackFill.style.width = (i / 10) * 100 + "%";
+        if (feedback) {
+          feedback.textContent = FEEDBACK_LABELS[i];
+          feedback.classList.remove("is-visible");
+          void feedback.offsetWidth;
+          feedback.classList.add("is-visible");
+        }
+        const block = group.closest(".rating-block");
+        if (block) block.classList.remove("has-error");
+      });
+      group.appendChild(btn);
+    }
+  });
+
+  function renderPreviews() {
+    previewGrid.innerHTML = "";
+    selectedFiles.forEach((file, index) => {
+      const url = URL.createObjectURL(file);
+      const thumb = document.createElement("div");
+      thumb.className = "photo-thumb";
+      thumb.innerHTML = `<img src="${url}" alt="Foto ${index + 1} enviada pelo cliente"><button type="button" class="remove-photo" aria-label="Remover foto ${index + 1}">&times;</button>`;
+      thumb.querySelector(".remove-photo").addEventListener("click", () => { selectedFiles.splice(index, 1); renderPreviews(); });
+      previewGrid.appendChild(thumb);
+    });
+  }
+
+  function addFiles(fileList) {
+    uploadError.classList.remove("is-visible");
+    const incoming = Array.from(fileList);
+    const rejected = incoming.filter((f) => !ALLOWED_TYPES.includes(f.type));
+    let accepted = incoming.filter((f) => ALLOWED_TYPES.includes(f.type));
+    if (selectedFiles.length + accepted.length > MAX_PHOTOS) {
+      accepted = accepted.slice(0, MAX_PHOTOS - selectedFiles.length);
+      uploadError.textContent = `Você pode enviar no máximo ${MAX_PHOTOS} fotos.`;
+      uploadError.classList.add("is-visible");
+    }
+    if (rejected.length) {
+      uploadError.textContent = "Formato não permitido. Envie apenas JPG, PNG ou WEBP.";
+      uploadError.classList.add("is-visible");
+    }
+    selectedFiles = selectedFiles.concat(accepted);
+    renderPreviews();
+  }
+
+  photoInput.addEventListener("change", (e) => addFiles(e.target.files));
+  document.getElementById("upload-trigger").addEventListener("click", () => photoInput.click());
+  ["dragover", "dragenter"].forEach((evt) => uploadZone.addEventListener(evt, (e) => { e.preventDefault(); uploadZone.classList.add("is-dragover"); }));
+  ["dragleave", "drop"].forEach((evt) => uploadZone.addEventListener(evt, (e) => { e.preventDefault(); uploadZone.classList.remove("is-dragover"); }));
+  uploadZone.addEventListener("drop", (e) => { if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+  function validate() {
+    let valid = true;
+    let firstErrorBlock = null;
+    scaleGroups.forEach((group) => {
+      const block = group.closest(".rating-block");
+      block.classList.remove("has-error");
+      if (!group.dataset.selected) {
+        block.classList.add("has-error");
+        valid = false;
+        if (!firstErrorBlock) firstErrorBlock = block;
+      }
+    });
+    const nameField = document.getElementById("customer-name");
+    const nameWrap = nameField.closest(".field");
+    nameWrap.classList.remove("has-error");
+    if (!nameField.value.trim()) {
+      nameWrap.classList.add("has-error");
+      valid = false;
+      if (!firstErrorBlock) firstErrorBlock = nameWrap;
+    }
+    if (firstErrorBlock) firstErrorBlock.scrollIntoView({ behavior: "smooth", block: "center" });
+    return valid;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    submitBtn.classList.add("is-loading");
+    submitBtn.disabled = true;
+    submitBtn.querySelector(".btn-label").textContent = "Enviando...";
+
+    const photoUrls = await uploadPhotos(selectedFiles);
+    const scores = {};
+    scaleGroups.forEach((g) => (scores[g.dataset.field] = Number(g.dataset.selected)));
+
+    const record = createReview({
+      customer_name: document.getElementById("customer-name").value.trim(),
+      customer_phone: document.getElementById("customer-phone").value.trim(),
+      quality_score: scores.quality_score,
+      overall_score: scores.overall_score,
+      comment: document.getElementById("customer-comment").value.trim(),
+      photos: photoUrls
+    });
+    lastSubmittedReviewId = record.id;
+
+    setTimeout(() => {
+      formWrap.style.display = "none";
+      successWrap.classList.add("is-active");
+      renderTestimonials();
+      submitBtn.classList.remove("is-loading");
+      submitBtn.disabled = false;
+      submitBtn.querySelector(".btn-label").textContent = "Enviar avaliação";
+    }, 500);
+  });
+
+  const shareData = { title: "Marmovidro", text: "Acabei de avaliar meu serviço com a Marmovidro!", url: window.location.href.split("#")[0] };
+  document.getElementById("share-btn").addEventListener("click", async () => {
+    if (navigator.share) { try { await navigator.share(shareData); } catch {} }
+    else { try { await navigator.clipboard.writeText(shareData.url); showToast("Link copiado! Cole onde quiser compartilhar."); } catch { showToast("Não foi possível compartilhar automaticamente."); } }
+  });
+  document.getElementById("copy-link-btn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(shareData.url); showToast("Link copiado!"); } catch { showToast("Não foi possível copiar automaticamente."); }
+  });
+})();
+
+(function initLogin() {
+  const form = document.getElementById("login-form");
+  const submitBtn = document.getElementById("login-btn");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email");
+    const password = document.getElementById("login-password");
+    let valid = true;
+    [email, password].forEach((field) => {
+      const wrap = field.closest(".field");
+      wrap.classList.remove("has-error");
+      if (!field.value.trim()) { wrap.classList.add("has-error"); valid = false; }
+    });
+    if (!valid) return;
+    submitBtn.classList.add("is-loading");
+    submitBtn.disabled = true;
+    submitBtn.querySelector(".btn-label").textContent = "Entrando...";
+    setTimeout(() => {
+      submitBtn.classList.remove("is-loading");
+      submitBtn.disabled = false;
+      submitBtn.querySelector(".btn-label").textContent = "Entrar";
+      showView("dashboard");
+    }, 400);
+  });
+})();
+
+function refreshDashboard() {
+  const menuBtn = document.getElementById("mobile-menu-btn");
+  const sidebar = document.getElementById("sidebar");
+  const scrim = document.getElementById("sidebar-scrim");
+  if (menuBtn && !menuBtn.dataset.bound) {
+    menuBtn.dataset.bound = "1";
+    menuBtn.addEventListener("click", () => { sidebar.classList.add("is-open"); scrim.classList.add("is-visible"); });
+    scrim.addEventListener("click", () => { sidebar.classList.remove("is-open"); scrim.classList.remove("is-visible"); });
+  }
+
+  const allReviews = loadReviews();
+  let filtered = [...allReviews];
+
+  renderStats(allReviews);
+  renderCategoryBars(allReviews);
+  renderTable(filtered);
+  initShareRow();
+
+  const search = document.getElementById("search-input");
+  const periodFilter = document.getElementById("filter-period");
+  const scoreFilter = document.getElementById("filter-score");
+  const photoFilter = document.getElementById("filter-photos");
+
+  function applyFilters() {
+    const term = (search.value || "").toLowerCase().trim();
+    const period = periodFilter.value;
+    const scoreMin = scoreFilter.value;
+    const photoState = photoFilter.value;
+    filtered = allReviews.filter((r) => {
+      if (term && !r.customer_name.toLowerCase().includes(term)) return false;
+      if (period !== "all") {
+        const days = Number(period);
+        const diff = (Date.now() - new Date(r.created_at)) / 86400000;
+        if (diff > days) return false;
+      }
+      if (scoreMin !== "all" && r.overall_score < Number(scoreMin)) return false;
+      if (photoState === "with" && (!r.photos || r.photos.length === 0)) return false;
+      if (photoState === "without" && r.photos && r.photos.length > 0) return false;
+      return true;
+    });
+    renderTable(filtered);
+  }
+  [search, periodFilter, scoreFilter, photoFilter].forEach((el) => { el.oninput = applyFilters; });
+}
+
+function renderStats(reviews) {
+  const avg = calculateAverages(reviews);
+  const thisMonth = reviews.filter((r) => {
+    const d = new Date(r.created_at); const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  document.getElementById("stat-average").textContent = avg.overall.toFixed(1).replace(".", ",");
+  document.getElementById("stat-total").textContent = avg.count;
+  document.getElementById("stat-photos").textContent = avg.photosCount;
+  document.getElementById("stat-month").textContent = thisMonth;
+}
+
+function renderCategoryBars(reviews) {
+  const avg = calculateAverages(reviews);
+  const rows = [
+    { label: "Qualidade do serviço", value: avg.quality },
+    { label: "Satisfação geral", value: avg.overall }
+  ];
+  const container = document.getElementById("category-bars");
+  container.innerHTML = rows.map((row) => `
+    <div class="category-row">
+      <div class="category-row-head"><span>${row.label}</span><span>${row.value.toFixed(1).replace(".", ",")}</span></div>
+      <div class="bar-track"><div class="bar-fill" data-target="${(row.value / 10) * 100}"></div></div>
+    </div>`).join("");
+  requestAnimationFrame(() => { container.querySelectorAll(".bar-fill").forEach((bar) => { bar.style.width = bar.dataset.target + "%"; }); });
+}
+
+function renderTable(reviews) {
+  const tbody = document.getElementById("reviews-tbody");
+  const cardsWrap = document.getElementById("reviews-cards");
+  if (!reviews.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</td></tr>`;
+    cardsWrap.innerHTML = `<p style="text-align:center; padding: 24px 0; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</p>`;
+    return;
+  }
+  tbody.innerHTML = reviews.map((r) => `
+    <tr>
+      <td>${r.customer_name}</td>
+      <td><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></td>
+      <td>${r.quality_score}</td>
+      <td>${formatDate(r.created_at)}</td>
+      <td>${r.photos && r.photos.length ? r.photos.length + " foto" + (r.photos.length > 1 ? "s" : "") : "—"}</td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn-ghost" onclick="openReviewDetail('${r.id}')">Ver avaliação</button>
+          <button type="button" class="btn-ghost btn-danger" onclick="handleDeleteReview('${r.id}')">${TRASH_ICON_SVG} Excluir</button>
+        </div>
+      </td>
+    </tr>`).join("");
+  cardsWrap.innerHTML = reviews.map((r) => `
+    <div class="review-card">
+      <div class="review-card-head"><strong>${r.customer_name}</strong><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></div>
+      <div class="review-card-meta">
+        <div>Qualidade: <span>${r.quality_score}</span></div>
+        <div>Data: <span>${formatDate(r.created_at)}</span></div>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn-ghost" style="flex:1;" onclick="openReviewDetail('${r.id}')">Ver avaliação</button>
+        <button type="button" class="btn-ghost btn-danger" style="flex:1;" onclick="handleDeleteReview('${r.id}')">${TRASH_ICON_SVG} Excluir</button>
+      </div>
+    </div>`).join("");
+}
+
+function initShareRow() {
+  const copyBtn = document.getElementById("copy-share-link");
+  const waBtn = document.getElementById("whatsapp-share-link");
+  const linkCode = document.getElementById("share-link-code");
+  const link = window.location.href.split("#")[0];
+  linkCode.textContent = link;
+  copyBtn.onclick = async () => { try { await navigator.clipboard.writeText(link); showToast("Link copiado!"); } catch { showToast("Não foi possível copiar automaticamente."); } };
+  waBtn.onclick = () => {
+    const message = `Olá! Gostaríamos muito de saber como foi sua experiência com a Marmovidro. Sua opinião leva menos de 1 minuto: ${link}`;
+    window.open(buildWhatsappUrl(message), "_blank");
+  };
+}
+
+function handleDeleteReview(id, redirectToDashboard) {
+  if (!confirm("Excluir esta avaliação? Isso é permanente enquanto o link estiver em fase de testes.")) return;
+  deleteReview(id);
+  showToast("Avaliação excluída.");
+  renderTestimonials();
+  if (redirectToDashboard) {
+    showView("dashboard");
+  } else if (document.getElementById("view-dashboard").classList.contains("is-active")) {
+    refreshDashboard();
+  }
+}
+
+function openReviewDetail(id) {
+  const review = loadReviews().find((r) => r.id === id);
+  if (!review) return;
+  document.getElementById("detail-customer-name").textContent = review.customer_name;
+  document.getElementById("detail-date").textContent = formatDate(review.created_at);
+  document.getElementById("detail-overall").textContent = review.overall_score.toFixed(1).replace(".", ",");
+  document.getElementById("detail-quality").textContent = review.quality_score;
+  document.getElementById("detail-comment").textContent = review.comment && review.comment.trim() ? review.comment : "O cliente não deixou comentário.";
+  const gallery = document.getElementById("detail-gallery");
+  gallery.innerHTML = review.photos && review.photos.length
+    ? review.photos.map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${review.customer_name}">`).join("")
+    : `<p style="color: var(--silver-500); font-size: 0.875rem;">Nenhuma foto enviada nesta avaliação.</p>`;
+  document.getElementById("detail-delete-btn").onclick = () => handleDeleteReview(review.id, true);
+  showView("detalhes");
+}
+</script>
+</body>
+</html>
