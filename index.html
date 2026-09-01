@@ -689,6 +689,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4c-4.94 0-8.95 4-8.95 8.94a8.9 8.9 0 0 0 1.2 4.48L3 21l3.66-1.27a8.98 8.98 0 0 0 4.38 1.12h.01c4.94 0 8.95-4.01 8.95-8.95a8.9 8.9 0 0 0-2.4-6.28ZM12.05 19.4a7.42 7.42 0 0 1-3.8-1.04l-.27-.16-2.83.98.95-2.75-.18-.28a7.44 7.44 0 0 1-1.14-3.97c0-4.12 3.36-7.47 7.48-7.47a7.4 7.4 0 0 1 5.28 2.2 7.4 7.4 0 0 1 2.19 5.27c0 4.12-3.36 7.47-7.48 7.47Zm4.09-5.6c-.22-.11-1.32-.65-1.53-.73-.2-.08-.35-.11-.5.11-.15.22-.58.73-.71.88-.13.15-.26.16-.48.06-.22-.11-.94-.35-1.79-1.12a6.7 6.7 0 0 1-1.24-1.55c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.22-.69-1.67-.18-.44-.36-.38-.5-.38-.13 0-.28-.01-.43-.01a.83.83 0 0 0-.6.28c-.2.22-.79.78-.79 1.9s.81 2.2.92 2.36c.11.15 1.6 2.46 3.88 3.44.54.24.97.38 1.3.48.55.17 1.05.15 1.44.09.44-.07 1.32-.54 1.51-1.06.19-.52.19-.96.13-1.06-.06-.1-.2-.15-.43-.26Z"></path></svg>
 </a>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const TRASH_ICON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
 
@@ -752,51 +753,66 @@ function scrollDashTo(anchor) {
   document.getElementById(map[anchor]).scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const MARMOVIDRO_DB_KEY = "marmovidro_reviews_v1";
-const MARMOVIDRO_DELETED_KEY = "marmovidro_deleted_ids_v1";
+/* ==========================================================================
+   Conexão real com o Supabase
+   ========================================================================== */
+const SUPABASE_URL = "https://itknuvmxkdzmerdxjldj.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0a251dm14a2R6bWVyZHhqbGRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzAwMjMsImV4cCI6MjEwMzg0NjAyM30.mWel1Unbappqmskq_BW7eGsMACvYEirboKKhdlEa3e4";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const SEED_REVIEWS = [
-  { id: "rev_001", customer_name: "João Silva", quality_score: 10, overall_score: 9.5,
-    comment: "Equipe muito atenciosa do início ao fim. O mármore da cozinha ficou exatamente como eu imaginava.", created_at: "2026-08-31",
-    photos: ["https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=400", "https://images.unsplash.com/photo-1771929662486-f793e08f0f16?w=400"] },
-  { id: "rev_002", customer_name: "Marina Costa", quality_score: 9, overall_score: 9.0,
-    comment: "Box do banheiro ficou perfeito, instalação rápida e limpa.", created_at: "2026-08-28",
-    photos: ["https://images.unsplash.com/photo-1771929662486-f793e08f0f16?w=400"] },
-  { id: "rev_003", customer_name: "Roberto Almeida", quality_score: 10, overall_score: 10,
-    comment: "Simplesmente perfeito, nota 10 em tudo.", created_at: "2026-08-25", photos: [] },
-  { id: "rev_004", customer_name: "Fernanda Lima", quality_score: 9, overall_score: 8.7,
-    comment: "Gostei muito do acabamento da bancada. O prazo foi um pouco apertado, mas o resultado final compensou a espera.", created_at: "2026-08-20",
-    photos: ["https://images.unsplash.com/photo-1709747820806-057272eddd5d?w=400"] },
-  { id: "rev_005", customer_name: "Carlos Eduardo", quality_score: 10, overall_score: 9.6,
-    comment: "Espelho sob medida ficou show, equipe super pontual.", created_at: "2026-08-14",
-    photos: ["https://images.unsplash.com/photo-1564540579594-0930edb6de43?w=400"] },
-  { id: "rev_006", customer_name: "Patrícia Nogueira", quality_score: 10, overall_score: 9.7,
-    comment: "Contratei pra fechar a área de serviço com vidro e ficou muito mais bonito do que eu esperava. Equipe explicou cada etapa antes de começar, o que me deixou bem tranquila.", created_at: "2026-08-10",
-    photos: [] }
-];
+async function loadReviews() {
+  const { data, error } = await supabaseClient
+    .from("reviews")
+    .select("*, review_photos(photo_url)")
+    .order("created_at", { ascending: false });
 
-function loadReviews() {
-  const stored = JSON.parse(localStorage.getItem(MARMOVIDRO_DB_KEY) || "[]");
-  const deletedIds = new Set(JSON.parse(localStorage.getItem(MARMOVIDRO_DELETED_KEY) || "[]"));
-  return [...stored, ...SEED_REVIEWS]
-    .filter((r) => !deletedIds.has(r.id))
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  if (error) {
+    console.error("Erro ao carregar avaliações:", error);
+    return [];
+  }
+
+  return data.map((r) => ({
+    id: r.id,
+    customer_name: r.customer_name,
+    customer_phone: r.customer_phone,
+    quality_score: r.quality_score,
+    overall_score: Number(r.overall_score),
+    comment: r.comment,
+    created_at: r.created_at.slice(0, 10),
+    photos: (r.review_photos || []).map((p) => p.photo_url)
+  }));
 }
 
-function createReview(reviewData) {
-  const stored = JSON.parse(localStorage.getItem(MARMOVIDRO_DB_KEY) || "[]");
-  const record = { id: "rev_" + Date.now(), created_at: new Date().toISOString().slice(0, 10), ...reviewData };
-  stored.unshift(record);
-  localStorage.setItem(MARMOVIDRO_DB_KEY, JSON.stringify(stored));
-  return record;
+async function createReview(reviewData) {
+  const { photos, ...fields } = reviewData;
+
+  const { data: inserted, error } = await supabaseClient
+    .from("reviews")
+    .insert([fields])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao salvar avaliação:", error);
+    showToast("Não foi possível enviar. Tente novamente.");
+    return null;
+  }
+
+  if (photos && photos.length) {
+    const photoRows = photos.map((url) => ({ review_id: inserted.id, photo_url: url }));
+    const { error: photoError } = await supabaseClient.from("review_photos").insert(photoRows);
+    if (photoError) console.error("Erro ao salvar fotos:", photoError);
+  }
+
+  return { ...inserted, overall_score: Number(inserted.overall_score), created_at: inserted.created_at.slice(0, 10), photos: photos || [] };
 }
 
-/* Exclusão — válida apenas nesta fase de testes (marca como removido no localStorage).
-   TODO: CONNECT TO SUPABASE — trocar por DELETE FROM reviews WHERE id = ... */
-function deleteReview(id) {
-  const deletedIds = JSON.parse(localStorage.getItem(MARMOVIDRO_DELETED_KEY) || "[]");
-  if (!deletedIds.includes(id)) deletedIds.push(id);
-  localStorage.setItem(MARMOVIDRO_DELETED_KEY, JSON.stringify(deletedIds));
+/* Exclusão real no banco — vale para qualquer avaliação, de qualquer aparelho.
+   TODO: quando o login virar autenticação real (Supabase Auth), restringir
+   a policy de DELETE para usuários autenticados apenas. */
+async function deleteReview(id) {
+  const { error } = await supabaseClient.from("reviews").delete().eq("id", id);
+  if (error) console.error("Erro ao excluir avaliação:", error);
 }
 
 function calculateAverages(reviews) {
@@ -812,7 +828,19 @@ function calculateAverages(reviews) {
 }
 
 async function uploadPhotos(fileList) {
-  return fileList.map((file) => URL.createObjectURL(file));
+  const urls = [];
+  for (const file of fileList) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+    const { error } = await supabaseClient.storage.from("review-photos").upload(path, file);
+    if (error) {
+      console.error("Erro ao enviar foto:", error);
+      continue;
+    }
+    const { data } = supabaseClient.storage.from("review-photos").getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
 }
 
 function showToast(message) {
@@ -831,10 +859,10 @@ function formatDate(isoDate) {
 
 let lastSubmittedReviewId = null;
 
-function renderTestimonials() {
+async function renderTestimonials() {
   const wall = document.getElementById("testimonial-wall");
   if (!wall) return;
-  const reviews = loadReviews().slice(0, 12);
+  const reviews = (await loadReviews()).slice(0, 12);
 
   if (!reviews.length) {
     wall.innerHTML = `<p class="wall-empty">Ainda não há depoimentos. Seja o primeiro a avaliar!</p>`;
@@ -980,7 +1008,7 @@ function renderTestimonials() {
     const scores = {};
     scaleGroups.forEach((g) => (scores[g.dataset.field] = Number(g.dataset.selected)));
 
-    const record = createReview({
+    const record = await createReview({
       customer_name: document.getElementById("customer-name").value.trim(),
       customer_phone: document.getElementById("customer-phone").value.trim(),
       quality_score: scores.quality_score,
@@ -988,6 +1016,14 @@ function renderTestimonials() {
       comment: document.getElementById("customer-comment").value.trim(),
       photos: photoUrls
     });
+
+    if (!record) {
+      submitBtn.classList.remove("is-loading");
+      submitBtn.disabled = false;
+      submitBtn.querySelector(".btn-label").textContent = "Enviar avaliação";
+      return;
+    }
+
     lastSubmittedReviewId = record.id;
 
     setTimeout(() => {
@@ -1036,7 +1072,7 @@ function renderTestimonials() {
   });
 })();
 
-function refreshDashboard() {
+async function refreshDashboard() {
   const menuBtn = document.getElementById("mobile-menu-btn");
   const sidebar = document.getElementById("sidebar");
   const scrim = document.getElementById("sidebar-scrim");
@@ -1046,7 +1082,7 @@ function refreshDashboard() {
     scrim.addEventListener("click", () => { sidebar.classList.remove("is-open"); scrim.classList.remove("is-visible"); });
   }
 
-  const allReviews = loadReviews();
+  const allReviews = await loadReviews();
   let filtered = [...allReviews];
 
   renderStats(allReviews);
@@ -1157,9 +1193,9 @@ function initShareRow() {
   };
 }
 
-function handleDeleteReview(id, redirectToDashboard) {
-  if (!confirm("Excluir esta avaliação? Isso é permanente enquanto o link estiver em fase de testes.")) return;
-  deleteReview(id);
+async function handleDeleteReview(id, redirectToDashboard) {
+  if (!confirm("Excluir esta avaliação? Isso é permanente.")) return;
+  await deleteReview(id);
   showToast("Avaliação excluída.");
   renderTestimonials();
   if (redirectToDashboard) {
@@ -1169,8 +1205,9 @@ function handleDeleteReview(id, redirectToDashboard) {
   }
 }
 
-function openReviewDetail(id) {
-  const review = loadReviews().find((r) => r.id === id);
+async function openReviewDetail(id) {
+  const reviews = await loadReviews();
+  const review = reviews.find((r) => r.id === id);
   if (!review) return;
   document.getElementById("detail-customer-name").textContent = review.customer_name;
   document.getElementById("detail-date").textContent = formatDate(review.created_at);
