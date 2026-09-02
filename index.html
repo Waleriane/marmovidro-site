@@ -59,6 +59,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .view { display: none; }
 .view.is-active { display: block; }
 
+.gate-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-5); text-align: center; gap: var(--space-6); }
+.gate-shell .logo-img { height: 72px; margin-bottom: var(--space-2); }
+.gate-tagline { font-size: 1rem; color: var(--silver-300); max-width: 32ch; }
+.gate-buttons { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 340px; }
+.btn-gate-primary { width: 100%; padding: 18px 24px; font-size: 1rem; }
+.btn-gate-adm { width: 100%; padding: 13px 24px; font-size: 0.8125rem; font-weight: 700; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.14); color: var(--silver-500);
+  letter-spacing: 0.04em; text-transform: uppercase; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.btn-gate-adm:hover { background: rgba(255,255,255,0.08); color: var(--silver-300); border-color: rgba(255,255,255,0.24); }
+
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 620ms cubic-bezier(.16,1,.3,1), transform 620ms cubic-bezier(.16,1,.3,1); }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
@@ -365,7 +375,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 <body>
 <div class="bg-facets" aria-hidden="true"></div>
 
-<section class="view is-active" id="view-home">
+<section class="view is-active" id="view-gate">
+  <main class="gate-shell">
+    <div>
+      <img src="logo.png" alt="Marmovidro" class="logo-img">
+      <p class="gate-tagline">Sofisticação em cada detalhe. Escolha uma opção para continuar.</p>
+    </div>
+    <div class="gate-buttons">
+      <button type="button" class="btn btn-primary btn-gate-primary" onclick="showView('home')">Avaliar Serviço</button>
+      <button type="button" class="btn-gate-adm" onclick="handleAdmClick()">ADM</button>
+    </div>
+  </main>
+</section>
+
+<section class="view" id="view-home">
   <main class="page-shell">
 
     <section class="hero-section reveal">
@@ -619,7 +642,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
           <span class="btn-label">Entrar</span>
         </button>
       </form>
-      <p class="form-footer-note"><a href="#" onclick="showView('home'); location.hash=''; return false;">Voltar ao site</a></p>
+      <p class="form-footer-note"><a href="#" onclick="showView('gate'); location.hash=''; return false;">Voltar</a></p>
     </section>
   </main>
 </section>
@@ -807,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }, { threshold: 0.12 });
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-  checkExistingSession();
+  // A tela de entrada (view-gate) já aparece por padrão — nada a checar aqui.
 });
 
 function showView(name) {
@@ -1219,21 +1242,20 @@ async function renderTestimonials() {
       return;
     }
 
-    location.hash = "admin";
+    location.hash = "";
     showView("dashboard");
   });
 })();
 
 async function handleLogout() {
   await supabaseClient.auth.signOut();
-  showView("login");
-  location.hash = "admin";
+  location.hash = "";
+  showView("gate");
 }
 
-/* Se já existir uma sessão válida (usuário já logou antes nesse navegador),
-   pula direto pro painel ao abrir o link #admin. */
-async function checkExistingSession() {
-  if (window.location.hash !== "#admin") return;
+/* Botão ADM da tela de entrada: se já tiver sessão válida, entra direto no
+   painel; senão, mostra a tela de login. */
+async function handleAdmClick() {
   const { data } = await supabaseClient.auth.getSession();
   if (data.session) {
     showView("dashboard");
