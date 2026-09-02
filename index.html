@@ -91,6 +91,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 .rating-block { text-align: left; margin-bottom: var(--space-5); }
 .rating-block:last-of-type { margin-bottom: var(--space-6); }
+.rating-slider { margin-bottom: var(--space-6); }
+.rating-slider-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: var(--space-5); }
+.rating-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.14); border: none; padding: 0; transition: background var(--transition), transform var(--transition); }
+.rating-dot.is-active { background: linear-gradient(120deg, var(--blue-500), var(--cyan-400)); transform: scale(1.35); }
+.rating-dot.is-done:not(.is-active) { background: var(--cyan-400); opacity: 0.65; }
+.rating-dot:disabled { cursor: default; }
+.rating-slider-viewport { overflow: hidden; }
+.rating-slider-track { display: flex; transition: transform 420ms cubic-bezier(.65,0,.35,1); }
+.rating-slide { flex: 0 0 100%; min-width: 0; }
+.rating-slider-nav { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-5); }
+.rating-slide-counter { font-size: 0.75rem; color: var(--silver-500); font-weight: 600; }
 .rating-question-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap; }
 .rating-question { font-size: 0.9375rem; font-weight: 600; color: var(--white); max-width: 34ch; }
 .rating-feedback { font-size: 0.75rem; font-weight: 700; color: var(--cyan-300); opacity: 0; transform: translateY(-2px); transition: opacity 260ms ease, transform 260ms ease; }
@@ -228,7 +239,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight: 700; font-size: 0.8125rem; background: rgba(53, 214, 240, 0.12); color: var(--cyan-300); }
 .testimonial-comment { font-size: 0.875rem; color: var(--silver-300); margin-bottom: var(--space-3); }
 .testimonial-photos { display: flex; gap: 6px; flex-wrap: wrap; }
-.testimonial-photos img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(125,200,255,0.18); }
+.testimonial-photos img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(125,200,255,0.18); cursor: pointer; transition: transform var(--transition), border-color var(--transition); }
+.testimonial-photos img:hover { transform: scale(1.05); border-color: rgba(53,214,240,0.5); }
+.star-rating { font-size: 0.9375rem; letter-spacing: 1px; margin-bottom: var(--space-2); display: inline-block; }
+.star-rating .star-filled { color: #f5c518; }
+.star-rating .star-empty { color: rgba(255,255,255,0.18); }
+.lightbox-overlay { position: fixed; inset: 0; background: rgba(5,14,31,0.94); display: none; align-items: center; justify-content: center; z-index: 100; padding: var(--space-5); cursor: zoom-out; }
+.lightbox-overlay.is-active { display: flex; }
+.lightbox-overlay img { max-width: 92vw; max-height: 88vh; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); border: 1px solid var(--surface-glass-border); }
 .wall-empty { text-align: center; color: var(--silver-500); font-size: 0.875rem; padding: var(--space-6) 0; }
 
 .location-band { width: 100%; background: var(--navy-900); border-top: 1px solid rgba(125,200,255,0.1); border-bottom: 1px solid rgba(125,200,255,0.1); padding: var(--space-7) var(--space-4); margin-bottom: var(--space-6); }
@@ -276,7 +294,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .reviews-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .score-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 4px 8px; border-radius: 999px; font-weight: 700; font-size: 0.8125rem; background: rgba(53, 214, 240, 0.12); color: var(--cyan-300); }
 .reviews-cards { display: none; }
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5); }
+.detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
 .detail-score-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(154, 167, 189, 0.15); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; }
 .detail-score-card .value { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: var(--cyan-300); }
 .detail-score-card .label { font-size: 0.75rem; color: var(--silver-500); margin-top: 4px; }
@@ -379,24 +397,68 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
             <form id="review-form" novalidate>
 
-              <div class="rating-block">
-                <div class="rating-question-row">
-                  <span class="rating-question" id="q-quality">Como você avalia o resultado final do serviço?</span>
-                  <span class="rating-feedback" data-feedback-for="quality_score"></span>
-                </div>
-                <div class="rating-scale" data-field="quality_score" role="group" aria-labelledby="q-quality"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
-                <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
-                <p class="rating-error" role="alert">Selecione uma nota.</p>
-              </div>
+              <div class="rating-slider">
+                <div class="rating-slider-dots" id="rating-dots"></div>
 
-              <div class="rating-block">
-                <div class="rating-question-row">
-                  <span class="rating-question" id="q-overall">De 1 a 10, qual nota você dá para sua experiência com a Marmovidro?</span>
-                  <span class="rating-feedback" data-feedback-for="overall_score"></span>
+                <div class="rating-slider-viewport">
+                  <div class="rating-slider-track" id="rating-track">
+
+                    <div class="rating-slide">
+                      <div class="rating-block">
+                        <div class="rating-question-row">
+                          <span class="rating-question" id="q-attendance">Como você avalia nosso atendimento?</span>
+                          <span class="rating-feedback" data-feedback-for="attendance_score"></span>
+                        </div>
+                        <div class="rating-scale" data-field="attendance_score" role="group" aria-labelledby="q-attendance"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                        <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                        <p class="rating-error" role="alert">Selecione uma nota para continuar.</p>
+                      </div>
+                    </div>
+
+                    <div class="rating-slide">
+                      <div class="rating-block">
+                        <div class="rating-question-row">
+                          <span class="rating-question" id="q-installation">Como você avalia nossa equipe durante a instalação?</span>
+                          <span class="rating-feedback" data-feedback-for="installation_score"></span>
+                        </div>
+                        <div class="rating-scale" data-field="installation_score" role="group" aria-labelledby="q-installation"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                        <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                        <p class="rating-error" role="alert">Selecione uma nota para continuar.</p>
+                      </div>
+                    </div>
+
+                    <div class="rating-slide">
+                      <div class="rating-block">
+                        <div class="rating-question-row">
+                          <span class="rating-question" id="q-quality">Como você avalia o resultado final do serviço?</span>
+                          <span class="rating-feedback" data-feedback-for="quality_score"></span>
+                        </div>
+                        <div class="rating-scale" data-field="quality_score" role="group" aria-labelledby="q-quality"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                        <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                        <p class="rating-error" role="alert">Selecione uma nota para continuar.</p>
+                      </div>
+                    </div>
+
+                    <div class="rating-slide">
+                      <div class="rating-block">
+                        <div class="rating-question-row">
+                          <span class="rating-question" id="q-overall">De 1 a 10, qual nota você dá para sua experiência com a Marmovidro?</span>
+                          <span class="rating-feedback" data-feedback-for="overall_score"></span>
+                        </div>
+                        <div class="rating-scale" data-field="overall_score" role="group" aria-labelledby="q-overall"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
+                        <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                        <p class="rating-error" role="alert">Selecione uma nota para continuar.</p>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
-                <div class="rating-scale" data-field="overall_score" role="group" aria-labelledby="q-overall"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
-                <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
-                <p class="rating-error" role="alert">Selecione uma nota.</p>
+
+                <div class="rating-slider-nav">
+                  <button type="button" class="btn-ghost" id="rating-prev">← Voltar</button>
+                  <span class="rating-slide-counter" id="rating-counter">Pergunta 1 de 4</span>
+                  <span style="width: 74px;" aria-hidden="true"></span>
+                </div>
               </div>
 
               <div class="field">
@@ -541,6 +603,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <p class="section-lead" style="text-align:center;">Acesse o painel para acompanhar as avaliações dos clientes.</p>
 
       <form id="login-form" novalidate>
+        <p id="login-auth-error" role="alert" style="display:none; color: var(--danger); font-size: 0.8125rem; margin-bottom: var(--space-4); text-align: center;"></p>
         <div class="field">
           <label for="login-email">E-mail</label>
           <input type="email" id="login-email" placeholder="seuemail@marmovidro.com.br" autocomplete="username">
@@ -583,7 +646,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </ul>
       </nav>
       <div class="sidebar-footer">
-        <button class="nav-link" onclick="showView('login'); location.hash='admin';"><span class="dot"></span><span class="label">Sair</span></button>
+        <button class="nav-link" onclick="handleLogout()"><span class="dot"></span><span class="label">Sair</span></button>
       </div>
     </aside>
 
@@ -628,7 +691,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </div>
         <div style="overflow-x: auto;">
           <table class="reviews-table">
-            <thead><tr><th>Cliente</th><th>Nota</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
+            <thead><tr><th>Cliente</th><th>Nota</th><th>Atendimento</th><th>Instalação</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
             <tbody id="reviews-tbody"></tbody>
           </table>
         </div>
@@ -660,7 +723,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </ul>
       </nav>
       <div class="sidebar-footer">
-        <button class="nav-link" onclick="showView('login'); location.hash='admin';"><span class="dot"></span><span class="label">Sair</span></button>
+        <button class="nav-link" onclick="handleLogout()"><span class="dot"></span><span class="label">Sair</span></button>
       </div>
     </aside>
     <main class="main-content">
@@ -674,6 +737,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <section class="panel">
         <div class="detail-grid">
           <div class="detail-score-card"><div class="value" id="detail-overall">–</div><div class="label">Satisfação geral</div></div>
+          <div class="detail-score-card"><div class="value" id="detail-attendance">–</div><div class="label">Atendimento</div></div>
+          <div class="detail-score-card"><div class="value" id="detail-installation">–</div><div class="label">Instalação</div></div>
           <div class="detail-score-card"><div class="value" id="detail-quality">–</div><div class="label">Qualidade do serviço</div></div>
         </div>
         <h2 class="panel-title">Comentário</h2>
@@ -684,6 +749,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     </main>
   </div>
 </section>
+
+<div class="lightbox-overlay" id="lightbox-overlay" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="Foto ampliada">
+</div>
 
 <a class="whatsapp-fab" id="whatsapp-fab" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4c-4.94 0-8.95 4-8.95 8.94a8.9 8.9 0 0 0 1.2 4.48L3 21l3.66-1.27a8.98 8.98 0 0 0 4.38 1.12h.01c4.94 0 8.95-4.01 8.95-8.95a8.9 8.9 0 0 0-2.4-6.28ZM12.05 19.4a7.42 7.42 0 0 1-3.8-1.04l-.27-.16-2.83.98.95-2.75-.18-.28a7.44 7.44 0 0 1-1.14-3.97c0-4.12 3.36-7.47 7.48-7.47a7.4 7.4 0 0 1 5.28 2.2 7.4 7.4 0 0 1 2.19 5.27c0 4.12-3.36 7.47-7.48 7.47Zm4.09-5.6c-.22-.11-1.32-.65-1.53-.73-.2-.08-.35-.11-.5.11-.15.22-.58.73-.71.88-.13.15-.26.16-.48.06-.22-.11-.94-.35-1.79-1.12a6.7 6.7 0 0 1-1.24-1.55c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.22-.69-1.67-.18-.44-.36-.38-.5-.38-.13 0-.28-.01-.43-.01a.83.83 0 0 0-.6.28c-.2.22-.79.78-.79 1.9s.81 2.2.92 2.36c.11.15 1.6 2.46 3.88 3.44.54.24.97.38 1.3.48.55.17 1.05.15 1.44.09.44-.07 1.32-.54 1.51-1.06.19-.52.19-.96.13-1.06-.06-.1-.2-.15-.43-.26Z"></path></svg>
@@ -738,7 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }, { threshold: 0.12 });
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-  if (window.location.hash === "#admin") showView("login");
+  checkExistingSession();
 });
 
 function showView(name) {
@@ -775,6 +844,8 @@ async function loadReviews() {
     id: r.id,
     customer_name: r.customer_name,
     customer_phone: r.customer_phone,
+    attendance_score: r.attendance_score,
+    installation_score: r.installation_score,
     quality_score: r.quality_score,
     overall_score: Number(r.overall_score),
     comment: r.comment,
@@ -816,10 +887,12 @@ async function deleteReview(id) {
 }
 
 function calculateAverages(reviews) {
-  if (!reviews.length) return { quality: 0, overall: 0, count: 0, photosCount: 0 };
+  if (!reviews.length) return { attendance: 0, installation: 0, quality: 0, overall: 0, count: 0, photosCount: 0 };
   const sum = (key) => reviews.reduce((acc, r) => acc + Number(r[key] || 0), 0);
   const round1 = (n) => Math.round(n * 10) / 10;
   return {
+    attendance: round1(sum("attendance_score") / reviews.length),
+    installation: round1(sum("installation_score") / reviews.length),
     quality: round1(sum("quality_score") / reviews.length),
     overall: round1(sum("overall_score") / reviews.length),
     count: reviews.length,
@@ -857,6 +930,21 @@ function formatDate(isoDate) {
   return `${d}/${m}/${y}`;
 }
 
+function renderStars(score) {
+  const filled = Math.max(0, Math.min(5, Math.floor(score / 2)));
+  const empty = 5 - filled;
+  return `<span class="star-rating"><span class="star-filled">${"★".repeat(filled)}</span><span class="star-empty">${"★".repeat(empty)}</span></span>`;
+}
+
+function openLightbox(url) {
+  document.getElementById("lightbox-img").src = url;
+  document.getElementById("lightbox-overlay").classList.add("is-active");
+}
+
+function closeLightbox() {
+  document.getElementById("lightbox-overlay").classList.remove("is-active");
+}
+
 let lastSubmittedReviewId = null;
 
 async function renderTestimonials() {
@@ -872,7 +960,7 @@ async function renderTestimonials() {
   wall.innerHTML = reviews.map((r) => {
     const comment = r.comment && r.comment.trim() ? r.comment : `Cliente avaliou o serviço com nota ${r.overall_score.toFixed(1).replace(".", ",")}.`;
     const photosHtml = r.photos && r.photos.length
-      ? `<div class="testimonial-photos">${r.photos.slice(0, 3).map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${r.customer_name}">`).join("")}</div>`
+      ? `<div class="testimonial-photos">${r.photos.slice(0, 3).map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${r.customer_name}" onclick="openLightbox('${url}')">`).join("")}</div>`
       : "";
     const isNew = r.id === lastSubmittedReviewId ? " is-new" : "";
     return `
@@ -884,6 +972,7 @@ async function renderTestimonials() {
           </div>
           <span class="testimonial-score">${r.overall_score.toFixed(1).replace(".", ",")}</span>
         </div>
+        ${renderStars(r.overall_score)}
         <p class="testimonial-comment">${comment}</p>
         ${photosHtml}
       </div>`;
@@ -897,6 +986,11 @@ async function renderTestimonials() {
   const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
   const FEEDBACK_LABELS = [null, "Muito ruim", "Muito ruim", "Ruim", "Ruim", "Regular", "Regular", "Bom", "Bom", "Excelente", "Excelente"];
   const scaleGroups = Array.from(document.querySelectorAll("#view-home .rating-scale"));
+  const totalSlides = scaleGroups.length;
+  const track = document.getElementById("rating-track");
+  const dotsWrap = document.getElementById("rating-dots");
+  const counterEl = document.getElementById("rating-counter");
+  const prevBtn = document.getElementById("rating-prev");
   const form = document.getElementById("review-form");
   const photoInput = document.getElementById("photo-input");
   const uploadZone = document.getElementById("upload-zone");
@@ -906,8 +1000,33 @@ async function renderTestimonials() {
   const formWrap = document.getElementById("avaliacao-form-wrap");
   const successWrap = document.getElementById("avaliacao-success");
   let selectedFiles = [];
+  let currentSlide = 0;
+  let maxReached = 0;
 
-  scaleGroups.forEach((group) => {
+  dotsWrap.innerHTML = scaleGroups.map((_, i) => `<button type="button" class="rating-dot" data-idx="${i}" aria-label="Ir para pergunta ${i + 1}"></button>`).join("");
+  const dots = Array.from(dotsWrap.querySelectorAll(".rating-dot"));
+
+  function updateSliderUI() {
+    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    counterEl.textContent = `Pergunta ${currentSlide + 1} de ${totalSlides}`;
+    prevBtn.disabled = currentSlide === 0;
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("is-active", i === currentSlide);
+      dot.classList.toggle("is-done", i < maxReached);
+      dot.disabled = i > maxReached;
+    });
+  }
+
+  function goToSlide(idx) {
+    if (idx < 0 || idx >= totalSlides || idx > maxReached) return;
+    currentSlide = idx;
+    updateSliderUI();
+  }
+
+  dots.forEach((dot) => dot.addEventListener("click", () => goToSlide(Number(dot.dataset.idx))));
+  prevBtn.addEventListener("click", () => goToSlide(currentSlide - 1));
+
+  scaleGroups.forEach((group, slideIndex) => {
     const feedback = group.closest(".rating-block").querySelector(".rating-feedback");
     const trackFill = group.querySelector(".rating-track-fill");
     for (let i = 1; i <= 10; i++) {
@@ -931,10 +1050,23 @@ async function renderTestimonials() {
         }
         const block = group.closest(".rating-block");
         if (block) block.classList.remove("has-error");
+
+        maxReached = Math.max(maxReached, Math.min(slideIndex + 1, totalSlides - 1));
+        updateSliderUI();
+
+        setTimeout(() => {
+          if (slideIndex < totalSlides - 1) {
+            goToSlide(slideIndex + 1);
+          } else {
+            document.getElementById("customer-comment").scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 480);
       });
       group.appendChild(btn);
     }
   });
+
+  updateSliderUI();
 
   function renderPreviews() {
     previewGrid.innerHTML = "";
@@ -974,25 +1106,25 @@ async function renderTestimonials() {
 
   function validate() {
     let valid = true;
-    let firstErrorBlock = null;
-    scaleGroups.forEach((group) => {
+    let firstErrorSlide = null;
+    scaleGroups.forEach((group, slideIndex) => {
       const block = group.closest(".rating-block");
       block.classList.remove("has-error");
       if (!group.dataset.selected) {
         block.classList.add("has-error");
         valid = false;
-        if (!firstErrorBlock) firstErrorBlock = block;
+        if (firstErrorSlide === null) firstErrorSlide = slideIndex;
       }
     });
+    if (firstErrorSlide !== null) {
+      maxReached = Math.max(maxReached, firstErrorSlide);
+      goToSlide(firstErrorSlide);
+      document.getElementById("avaliacao-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     const nameField = document.getElementById("customer-name");
     const nameWrap = nameField.closest(".field");
     nameWrap.classList.remove("has-error");
-    if (!nameField.value.trim()) {
-      nameWrap.classList.add("has-error");
-      valid = false;
-      if (!firstErrorBlock) firstErrorBlock = nameWrap;
-    }
-    if (firstErrorBlock) firstErrorBlock.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!nameField.value.trim()) { nameWrap.classList.add("has-error"); valid = false; }
     return valid;
   }
 
@@ -1011,6 +1143,8 @@ async function renderTestimonials() {
     const record = await createReview({
       customer_name: document.getElementById("customer-name").value.trim(),
       customer_phone: document.getElementById("customer-phone").value.trim(),
+      attendance_score: scores.attendance_score,
+      installation_score: scores.installation_score,
       quality_score: scores.quality_score,
       overall_score: scores.overall_score,
       comment: document.getElementById("customer-comment").value.trim(),
@@ -1049,7 +1183,9 @@ async function renderTestimonials() {
 (function initLogin() {
   const form = document.getElementById("login-form");
   const submitBtn = document.getElementById("login-btn");
-  form.addEventListener("submit", (e) => {
+  const errorEl = document.getElementById("login-auth-error");
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email");
     const password = document.getElementById("login-password");
@@ -1060,17 +1196,51 @@ async function renderTestimonials() {
       if (!field.value.trim()) { wrap.classList.add("has-error"); valid = false; }
     });
     if (!valid) return;
+
+    if (errorEl) errorEl.style.display = "none";
     submitBtn.classList.add("is-loading");
     submitBtn.disabled = true;
     submitBtn.querySelector(".btn-label").textContent = "Entrando...";
-    setTimeout(() => {
-      submitBtn.classList.remove("is-loading");
-      submitBtn.disabled = false;
-      submitBtn.querySelector(".btn-label").textContent = "Entrar";
-      showView("dashboard");
-    }, 400);
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: email.value.trim(),
+      password: password.value
+    });
+
+    submitBtn.classList.remove("is-loading");
+    submitBtn.disabled = false;
+    submitBtn.querySelector(".btn-label").textContent = "Entrar";
+
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = "E-mail ou senha incorretos.";
+        errorEl.style.display = "block";
+      }
+      return;
+    }
+
+    location.hash = "admin";
+    showView("dashboard");
   });
 })();
+
+async function handleLogout() {
+  await supabaseClient.auth.signOut();
+  showView("login");
+  location.hash = "admin";
+}
+
+/* Se já existir uma sessão válida (usuário já logou antes nesse navegador),
+   pula direto pro painel ao abrir o link #admin. */
+async function checkExistingSession() {
+  if (window.location.hash !== "#admin") return;
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    showView("dashboard");
+  } else {
+    showView("login");
+  }
+}
 
 async function refreshDashboard() {
   const menuBtn = document.getElementById("mobile-menu-btn");
@@ -1132,6 +1302,8 @@ function renderStats(reviews) {
 function renderCategoryBars(reviews) {
   const avg = calculateAverages(reviews);
   const rows = [
+    { label: "Atendimento", value: avg.attendance },
+    { label: "Instalação", value: avg.installation },
     { label: "Qualidade do serviço", value: avg.quality },
     { label: "Satisfação geral", value: avg.overall }
   ];
@@ -1148,7 +1320,7 @@ function renderTable(reviews) {
   const tbody = document.getElementById("reviews-tbody");
   const cardsWrap = document.getElementById("reviews-cards");
   if (!reviews.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:32px; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</td></tr>`;
     cardsWrap.innerHTML = `<p style="text-align:center; padding: 24px 0; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</p>`;
     return;
   }
@@ -1156,6 +1328,8 @@ function renderTable(reviews) {
     <tr>
       <td>${r.customer_name}</td>
       <td><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></td>
+      <td>${r.attendance_score}</td>
+      <td>${r.installation_score}</td>
       <td>${r.quality_score}</td>
       <td>${formatDate(r.created_at)}</td>
       <td>${r.photos && r.photos.length ? r.photos.length + " foto" + (r.photos.length > 1 ? "s" : "") : "—"}</td>
@@ -1170,6 +1344,8 @@ function renderTable(reviews) {
     <div class="review-card">
       <div class="review-card-head"><strong>${r.customer_name}</strong><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></div>
       <div class="review-card-meta">
+        <div>Atendimento: <span>${r.attendance_score}</span></div>
+        <div>Instalação: <span>${r.installation_score}</span></div>
         <div>Qualidade: <span>${r.quality_score}</span></div>
         <div>Data: <span>${formatDate(r.created_at)}</span></div>
       </div>
@@ -1212,11 +1388,13 @@ async function openReviewDetail(id) {
   document.getElementById("detail-customer-name").textContent = review.customer_name;
   document.getElementById("detail-date").textContent = formatDate(review.created_at);
   document.getElementById("detail-overall").textContent = review.overall_score.toFixed(1).replace(".", ",");
+  document.getElementById("detail-attendance").textContent = review.attendance_score;
+  document.getElementById("detail-installation").textContent = review.installation_score;
   document.getElementById("detail-quality").textContent = review.quality_score;
   document.getElementById("detail-comment").textContent = review.comment && review.comment.trim() ? review.comment : "O cliente não deixou comentário.";
   const gallery = document.getElementById("detail-gallery");
   gallery.innerHTML = review.photos && review.photos.length
-    ? review.photos.map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${review.customer_name}">`).join("")
+    ? review.photos.map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${review.customer_name}" style="cursor:pointer;" onclick="openLightbox('${url}')">`).join("")
     : `<p style="color: var(--silver-500); font-size: 0.875rem;">Nenhuma foto enviada nesta avaliação.</p>`;
   document.getElementById("detail-delete-btn").onclick = () => handleDeleteReview(review.id, true);
   showView("detalhes");
