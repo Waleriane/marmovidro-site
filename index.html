@@ -276,6 +276,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .lightbox-overlay { position: fixed; inset: 0; background: rgba(5,14,31,0.94); display: none; align-items: center; justify-content: center; z-index: 100; padding: var(--space-5); cursor: zoom-out; }
 .lightbox-overlay.is-active { display: flex; }
 .lightbox-overlay img { max-width: 92vw; max-height: 88vh; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); border: 1px solid var(--surface-glass-border); }
+.lightbox-close { position: fixed; top: var(--space-4); right: var(--space-4); width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: var(--white);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 101; transition: background var(--transition); }
+.lightbox-close:hover { background: rgba(255,255,255,0.16); }
 .wall-empty { text-align: center; color: var(--silver-500); font-size: 0.875rem; padding: var(--space-6) 0; }
 
 .location-band { width: 100%; background: var(--navy-900); border-top: 1px solid rgba(125,200,255,0.1); border-bottom: 1px solid rgba(125,200,255,0.1); padding: var(--space-7) var(--space-4); margin-bottom: var(--space-6); }
@@ -415,6 +419,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .review-card-meta span { color: var(--silver-300); }
   .review-card .btn-ghost { width: 100%; text-align: center; justify-content: center; }
   .whatsapp-fab { width: 52px; height: 52px; right: 14px; bottom: 14px; }
+
+  .gate-content { padding: var(--space-6) var(--space-4); gap: var(--space-5); }
+  .gate-shell .logo-img { height: 56px; }
+  .gate-buttons { max-width: 100%; }
+  .gate-adm-icon { width: 40px; height: 40px; top: var(--space-4); right: var(--space-4); }
+
+  .admin-reviews-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-review-actions .btn-ghost { min-width: 0; }
+
+  .config-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .config-value { max-width: 100%; text-align: left; }
+
+  .clients-table { font-size: 0.8125rem; }
+  .clients-table th, .clients-table td { padding: 8px; }
+
+  .lightbox-close { width: 40px; height: 40px; top: var(--space-3); right: var(--space-3); }
 }
 @media (min-width: 600px) and (max-width: 899px) {
   .admin-layout { grid-template-columns: 84px minmax(0, 1fr); }
@@ -495,7 +515,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
                     <div class="rating-slide">
                       <div class="rating-block">
                         <div class="rating-question-row">
-                          <span class="rating-question" id="q-attendance">Como você avalia nosso atendimento?</span>
+                          <span class="rating-question" id="q-attendance">Como foi nosso atendimento, do primeiro contato ao orçamento?</span>
                           <span class="rating-feedback" data-feedback-for="attendance_score"></span>
                         </div>
                         <div class="rating-scale" data-field="attendance_score" role="group" aria-labelledby="q-attendance"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
@@ -507,7 +527,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
                     <div class="rating-slide">
                       <div class="rating-block">
                         <div class="rating-question-row">
-                          <span class="rating-question" id="q-installation">Como você avalia nossa equipe durante a instalação?</span>
+                          <span class="rating-question" id="q-installation">Como foi a pontualidade e o cuidado da equipe no dia da instalação?</span>
                           <span class="rating-feedback" data-feedback-for="installation_score"></span>
                         </div>
                         <div class="rating-scale" data-field="installation_score" role="group" aria-labelledby="q-installation"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
@@ -519,7 +539,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
                     <div class="rating-slide">
                       <div class="rating-block">
                         <div class="rating-question-row">
-                          <span class="rating-question" id="q-quality">Como você avalia o resultado final do serviço?</span>
+                          <span class="rating-question" id="q-quality">Qual nota você dá para o material e o acabamento entregues?</span>
                           <span class="rating-feedback" data-feedback-for="quality_score"></span>
                         </div>
                         <div class="rating-scale" data-field="quality_score" role="group" aria-labelledby="q-quality"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
@@ -531,11 +551,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
                     <div class="rating-slide">
                       <div class="rating-block">
                         <div class="rating-question-row">
-                          <span class="rating-question" id="q-overall">De 1 a 10, qual nota você dá para sua experiência com a Marmovidro?</span>
+                          <span class="rating-question" id="q-overall">De 0 a 10, qual a chance de você indicar a Marmovidro pra um amigo ou familiar?</span>
                           <span class="rating-feedback" data-feedback-for="overall_score"></span>
                         </div>
                         <div class="rating-scale" data-field="overall_score" role="group" aria-labelledby="q-overall"><div class="rating-track"><div class="rating-track-fill"></div></div></div>
-                        <div class="rating-scale-labels"><span>Muito ruim</span><span>Excelente</span></div>
+                        <div class="rating-scale-labels"><span>Nada provável</span><span>Muito provável</span></div>
                         <p class="rating-error" role="alert">Selecione uma nota para continuar.</p>
                       </div>
                     </div>
@@ -877,7 +897,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 </section>
 
 <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeLightbox()">
-  <img id="lightbox-img" src="" alt="Foto ampliada">
+  <button type="button" class="lightbox-close" onclick="event.stopPropagation(); closeLightbox();" aria-label="Fechar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </button>
+  <img id="lightbox-img" src="" alt="Foto ampliada" onclick="event.stopPropagation();">
 </div>
 
 <a class="whatsapp-fab" id="whatsapp-fab" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
