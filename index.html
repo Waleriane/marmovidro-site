@@ -35,11 +35,12 @@
   --transition: 180ms cubic-bezier(.4, 0, .2, 1);
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100vw; }
 body {
   margin: 0; font-family: var(--font-body);
   background: radial-gradient(ellipse at top, var(--navy-800) 0%, var(--navy-950) 65%);
   color: var(--white); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5;
+  overflow-x: hidden; max-width: 100vw;
 }
 h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; color: var(--white); }
 p { margin: 0; color: var(--silver-300); }
@@ -59,7 +60,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .view { display: none; }
 .view.is-active { display: block; }
 
-.gate-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-5); text-align: center; gap: var(--space-6); }
+.gate-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-5); text-align: center; gap: var(--space-6);
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(5,14,31,0.72) 0%, rgba(5,14,31,0.88) 55%, rgba(5,14,31,0.97) 100%),
+    url('https://images.unsplash.com/photo-1699982758974-0703b87f052d?w=1600&auto=format&fit=crop&q=65') center/cover no-repeat;
+}
+.gate-content { background: rgba(10, 24, 48, 0.45); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg);
+  padding: var(--space-7) var(--space-6); display: flex; flex-direction: column; align-items: center; gap: var(--space-6); box-shadow: var(--shadow-soft); }
 .gate-shell .logo-img { height: 72px; margin-bottom: var(--space-2); }
 .gate-tagline { font-size: 1rem; color: var(--silver-300); max-width: 32ch; }
 .gate-buttons { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 340px; }
@@ -279,6 +287,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .nav-link.is-active .dot { opacity: 1; color: var(--cyan-400); }
 .sidebar-footer { margin-top: auto; }
 .main-content { padding: var(--space-6) var(--space-7); max-width: 1200px; }
+.admin-tab { display: none; animation: tab-fade 320ms ease; }
+.admin-tab.is-active { display: block; }
+@keyframes tab-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .content-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3); }
 .content-header h1 { font-size: 1.625rem; margin-bottom: 4px; }
 .mobile-topbar { display: none; }
@@ -377,13 +388,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 <section class="view is-active" id="view-gate">
   <main class="gate-shell">
-    <div>
-      <img src="logo.png" alt="Marmovidro" class="logo-img">
-      <p class="gate-tagline">Sofisticação em cada detalhe. Escolha uma opção para continuar.</p>
-    </div>
-    <div class="gate-buttons">
-      <button type="button" class="btn btn-primary btn-gate-primary" onclick="showView('home')">Avaliar Serviço</button>
-      <button type="button" class="btn-gate-adm" onclick="handleAdmClick()">ADM</button>
+    <div class="gate-content">
+      <div>
+        <img src="logo.png" alt="Marmovidro" class="logo-img">
+        <p class="gate-tagline">Sofisticação em cada detalhe. Escolha uma opção para continuar.</p>
+      </div>
+      <div class="gate-buttons">
+        <button type="button" class="btn btn-primary btn-gate-primary" onclick="showView('home')">Avaliar Serviço</button>
+        <button type="button" class="btn-gate-adm" onclick="handleAdmClick()">ADM</button>
+      </div>
     </div>
   </main>
 </section>
@@ -661,10 +674,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <div class="sidebar-brand"><img src="logo.png" alt="Marmovidro" class="logo-img"></div>
       <nav aria-label="Navegação do painel">
         <ul class="nav-list">
-          <li><button class="nav-link is-active" onclick="scrollDashTo('topo')"><span class="dot"></span><span class="label">Dashboard</span></button></li>
-          <li><button class="nav-link" onclick="scrollDashTo('avaliacoes')"><span class="dot"></span><span class="label">Avaliações</span></button></li>
+          <li><button class="nav-link is-active" id="tab-btn-dashboard" onclick="switchAdminTab('dashboard')"><span class="dot"></span><span class="label">Dashboard</span></button></li>
+          <li><button class="nav-link" id="tab-btn-avaliacoes" onclick="switchAdminTab('avaliacoes')"><span class="dot"></span><span class="label">Avaliações</span></button></li>
           <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Clientes</span></button></li>
-          <li><button class="nav-link" onclick="scrollDashTo('relatorios')"><span class="dot"></span><span class="label">Relatórios</span></button></li>
+          <li><button class="nav-link" id="tab-btn-relatorios" onclick="switchAdminTab('relatorios')"><span class="dot"></span><span class="label">Relatórios</span></button></li>
           <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Configurações</span></button></li>
         </ul>
       </nav>
@@ -673,64 +686,69 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       </div>
     </aside>
 
-    <main class="main-content" id="dash-topo">
+    <main class="main-content">
       <div class="content-header">
         <div><h1>Olá, Marmovidro</h1><p>Acompanhe a experiência dos seus clientes.</p></div>
       </div>
 
-      <section class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Avaliação média</div><div class="stat-value" id="stat-average">–</div></div>
-        <div class="stat-card"><div class="stat-label">Total de avaliações</div><div class="stat-value" id="stat-total">–</div></div>
-        <div class="stat-card"><div class="stat-label">Fotos recebidas</div><div class="stat-value" id="stat-photos">–</div></div>
-        <div class="stat-card"><div class="stat-label">Avaliações este mês</div><div class="stat-value" id="stat-month">–</div></div>
-      </section>
+      <div class="admin-tab is-active" id="admin-tab-dashboard">
+        <section class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Avaliação média</div><div class="stat-value" id="stat-average">–</div></div>
+          <div class="stat-card"><div class="stat-label">Total de avaliações</div><div class="stat-value" id="stat-total">–</div></div>
+          <div class="stat-card"><div class="stat-label">Fotos recebidas</div><div class="stat-value" id="stat-photos">–</div></div>
+          <div class="stat-card"><div class="stat-label">Avaliações este mês</div><div class="stat-value" id="stat-month">–</div></div>
+        </section>
 
-      <section class="panel" id="dash-relatorios">
-        <h2 class="panel-title">Desempenho por categoria</h2>
-        <div id="category-bars"></div>
-      </section>
+        <section class="panel">
+          <h2 class="panel-title">Compartilhar pesquisa</h2>
+          <p class="section-lead" style="margin-bottom: 16px; text-align: left;">Envie o link da pesquisa de satisfação para o seu cliente.</p>
+          <div class="share-link-row">
+            <code id="share-link-code">envie o link da avaliação pelo WhatsApp</code>
+            <button class="btn-ghost" id="whatsapp-share-link">Enviar por WhatsApp</button>
+            <button class="btn-ghost" id="copy-share-link">Copiar link</button>
+          </div>
+        </section>
+      </div>
 
-      <section class="panel" id="dash-avaliacoes">
-        <h2 class="panel-title">Últimas avaliações</h2>
-        <div class="filters-row">
-          <input type="search" id="search-input" placeholder="Buscar por nome do cliente..." aria-label="Buscar por nome do cliente">
-          <select id="filter-period" aria-label="Filtrar por período">
-            <option value="all">Todo o período</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
-          </select>
-          <select id="filter-score" aria-label="Filtrar por nota mínima">
-            <option value="all">Qualquer nota</option>
-            <option value="9">A partir de 9</option>
-            <option value="7">A partir de 7</option>
-            <option value="5">A partir de 5</option>
-          </select>
-          <select id="filter-photos" aria-label="Filtrar por presença de fotos">
-            <option value="all">Com ou sem fotos</option>
-            <option value="with">Com fotos</option>
-            <option value="without">Sem fotos</option>
-          </select>
-        </div>
-        <div style="overflow-x: auto;">
-          <table class="reviews-table">
-            <thead><tr><th>Cliente</th><th>Nota</th><th>Atendimento</th><th>Instalação</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
-            <tbody id="reviews-tbody"></tbody>
-          </table>
-        </div>
-        <div class="reviews-cards" id="reviews-cards"></div>
-      </section>
+      <div class="admin-tab" id="admin-tab-avaliacoes">
+        <section class="panel">
+          <h2 class="panel-title">Últimas avaliações</h2>
+          <div class="filters-row">
+            <input type="search" id="search-input" placeholder="Buscar por nome do cliente..." aria-label="Buscar por nome do cliente">
+            <select id="filter-period" aria-label="Filtrar por período">
+              <option value="all">Todo o período</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+            </select>
+            <select id="filter-score" aria-label="Filtrar por nota mínima">
+              <option value="all">Qualquer nota</option>
+              <option value="9">A partir de 9</option>
+              <option value="7">A partir de 7</option>
+              <option value="5">A partir de 5</option>
+            </select>
+            <select id="filter-photos" aria-label="Filtrar por presença de fotos">
+              <option value="all">Com ou sem fotos</option>
+              <option value="with">Com fotos</option>
+              <option value="without">Sem fotos</option>
+            </select>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="reviews-table">
+              <thead><tr><th>Cliente</th><th>Nota</th><th>Atendimento</th><th>Instalação</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
+              <tbody id="reviews-tbody"></tbody>
+            </table>
+          </div>
+          <div class="reviews-cards" id="reviews-cards"></div>
+        </section>
+      </div>
 
-      <section class="panel">
-        <h2 class="panel-title">Compartilhar pesquisa</h2>
-        <p class="section-lead" style="margin-bottom: 16px;">Envie o link da pesquisa de satisfação para o seu cliente.</p>
-        <div class="share-link-row">
-          <code id="share-link-code">envie o link da avaliação pelo WhatsApp</code>
-          <button class="btn-ghost" id="whatsapp-share-link">Enviar por WhatsApp</button>
-          <button class="btn-ghost" id="copy-share-link">Copiar link</button>
-        </div>
-        <p class="hint" style="margin-top: 10px;">TODO: CONNECT TO SUPABASE — no futuro cada cliente receberá um link individual gerado automaticamente após o fechamento do serviço.</p>
-      </section>
+      <div class="admin-tab" id="admin-tab-relatorios">
+        <section class="panel">
+          <h2 class="panel-title">Desempenho por categoria</h2>
+          <div id="category-bars"></div>
+        </section>
+      </div>
     </main>
   </div>
 </section>
@@ -840,9 +858,17 @@ function showView(name) {
   if (name === "dashboard") refreshDashboard();
 }
 
-function scrollDashTo(anchor) {
-  const map = { topo: "dash-topo", avaliacoes: "dash-avaliacoes", relatorios: "dash-relatorios" };
-  document.getElementById(map[anchor]).scrollIntoView({ behavior: "smooth", block: "start" });
+function switchAdminTab(name) {
+  document.querySelectorAll(".admin-tab").forEach((tab) => tab.classList.remove("is-active"));
+  document.querySelectorAll(".sidebar .nav-link").forEach((btn) => btn.classList.remove("is-active"));
+  document.getElementById("admin-tab-" + name).classList.add("is-active");
+  const btn = document.getElementById("tab-btn-" + name);
+  if (btn) btn.classList.add("is-active");
+  document.querySelector(".main-content").scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  const sidebar = document.getElementById("sidebar");
+  const scrim = document.getElementById("sidebar-scrim");
+  if (sidebar) sidebar.classList.remove("is-open");
+  if (scrim) scrim.classList.remove("is-visible");
 }
 
 /* ==========================================================================
@@ -1265,6 +1291,8 @@ async function handleAdmClick() {
 }
 
 async function refreshDashboard() {
+  switchAdminTab("dashboard");
+
   const menuBtn = document.getElementById("mobile-menu-btn");
   const sidebar = document.getElementById("sidebar");
   const scrim = document.getElementById("sidebar-scrim");
