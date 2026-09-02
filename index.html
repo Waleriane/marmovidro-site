@@ -63,8 +63,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .gate-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-5); text-align: center; gap: var(--space-6);
   position: relative;
   background:
-    linear-gradient(180deg, rgba(5,14,31,0.72) 0%, rgba(5,14,31,0.88) 55%, rgba(5,14,31,0.97) 100%),
-    url('https://images.unsplash.com/photo-1699982758974-0703b87f052d?w=1600&auto=format&fit=crop&q=65') center/cover no-repeat;
+    linear-gradient(180deg, rgba(5,14,31,0.75) 0%, rgba(5,14,31,0.9) 60%, rgba(5,14,31,0.97) 100%),
+    url('https://images.unsplash.com/photo-1564540579594-0930edb6de43?w=1600&auto=format&fit=crop&q=65') center/cover no-repeat;
 }
 .gate-content { background: rgba(10, 24, 48, 0.45); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg);
   padding: var(--space-7) var(--space-6); display: flex; flex-direction: column; align-items: center; gap: var(--space-6); box-shadow: var(--shadow-soft); }
@@ -72,10 +72,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .gate-tagline { font-size: 1rem; color: var(--silver-300); max-width: 32ch; }
 .gate-buttons { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 340px; }
 .btn-gate-primary { width: 100%; padding: 18px 24px; font-size: 1rem; }
-.btn-gate-adm { width: 100%; padding: 13px 24px; font-size: 0.8125rem; font-weight: 700; border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.14); color: var(--silver-500);
-  letter-spacing: 0.04em; text-transform: uppercase; transition: background var(--transition), color var(--transition), border-color var(--transition); }
-.btn-gate-adm:hover { background: rgba(255,255,255,0.08); color: var(--silver-300); border-color: rgba(255,255,255,0.24); }
+.btn-gate-secondary { width: 100%; padding: 15px 24px; font-size: 0.9375rem; font-weight: 700; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.18); color: var(--white);
+  transition: background var(--transition), border-color var(--transition); }
+.btn-gate-secondary:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.3); }
+.gate-adm-icon { position: fixed; top: var(--space-5); right: var(--space-5); z-index: 20; width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); color: var(--silver-300);
+  display: flex; align-items: center; justify-content: center; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.gate-adm-icon:hover { background: rgba(255,255,255,0.12); color: var(--white); border-color: rgba(255,255,255,0.3); }
+.gate-adm-icon svg { width: 20px; height: 20px; }
 
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 620ms cubic-bezier(.16,1,.3,1), transform 620ms cubic-bezier(.16,1,.3,1); }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
@@ -299,6 +304,38 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .content-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3); }
 .content-header h1 { font-size: 1.625rem; margin-bottom: 4px; }
 .mobile-topbar { display: none; }
+
+.dash-banner { position: relative; width: 100%; height: 160px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: var(--space-6);
+  border: 1px solid var(--surface-glass-border); box-shadow: var(--shadow-soft); }
+.dash-banner img { width: 100%; height: 100%; object-fit: cover; }
+.dash-banner-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 var(--space-6);
+  background: linear-gradient(90deg, rgba(5,14,31,0.92) 0%, rgba(5,14,31,0.65) 55%, rgba(5,14,31,0.25) 100%); }
+.dash-banner-overlay h1 { font-size: 1.5rem; margin-bottom: 4px; }
+.dash-banner-overlay p { color: var(--silver-300); }
+
+.admin-reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); }
+.admin-review-card { background: rgba(255,255,255,0.02); border: 1px solid var(--surface-glass-border); border-radius: var(--radius-md); padding: var(--space-4); }
+.admin-review-card .testimonial-head { margin-bottom: var(--space-2); }
+.admin-review-card .admin-review-comment { font-size: 0.875rem; color: var(--silver-300); margin-bottom: var(--space-3); }
+.admin-review-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
+.admin-review-photos img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(125,200,255,0.18); cursor: pointer; }
+.admin-review-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.admin-review-actions .btn-ghost { flex: 1; min-width: 90px; text-align: center; justify-content: center; }
+.admin-reply-box { background: rgba(53,214,240,0.06); border: 1px solid rgba(53,214,240,0.2); border-radius: var(--radius-sm); padding: var(--space-3); margin-top: var(--space-2); }
+.admin-reply-box .reply-label { font-size: 0.75rem; font-weight: 700; color: var(--cyan-300); margin-bottom: 4px; display: block; }
+.admin-reply-box p { font-size: 0.8125rem; color: var(--silver-300); }
+.admin-reply-form textarea { width: 100%; min-height: 70px; background: rgba(5,14,31,0.5); border: 1px solid rgba(154,167,189,0.25); border-radius: var(--radius-sm);
+  color: var(--white); padding: var(--space-2); font-family: var(--font-body); font-size: 0.8125rem; margin-bottom: var(--space-2); }
+
+.clients-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.clients-table th { text-align: left; color: var(--silver-500); font-weight: 600; font-size: 0.75rem; padding: 10px 12px; border-bottom: 1px solid rgba(154, 167, 189, 0.15); }
+.clients-table td { padding: 12px; border-bottom: 1px solid rgba(154, 167, 189, 0.08); color: var(--silver-300); }
+
+.config-row { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid rgba(154,167,189,0.1); flex-wrap: wrap; }
+.config-row:last-of-type { border-bottom: none; }
+.config-label { font-size: 0.875rem; color: var(--silver-500); font-weight: 600; }
+.config-value { font-size: 0.875rem; color: var(--white); word-break: break-word; max-width: 60%; text-align: right; }
+
 .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
 .stat-card { background: var(--surface-card); border: 1px solid var(--surface-glass-border); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: var(--shadow-soft); }
 .stat-label { font-size: 0.75rem; color: var(--silver-500); font-weight: 600; margin-bottom: var(--space-2); }
@@ -361,6 +398,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .sidebar-scrim { display: none; position: fixed; inset: 0; background: rgba(2, 6, 16, 0.6); z-index: 35; }
   .sidebar-scrim.is-visible { display: block; }
   .main-content { padding: var(--space-5) var(--space-4); }
+  .dash-banner { height: 110px; }
+  .dash-banner-overlay { padding: 0 var(--space-4); background: linear-gradient(90deg, rgba(5,14,31,0.95) 0%, rgba(5,14,31,0.75) 70%, rgba(5,14,31,0.4) 100%); }
+  .dash-banner-overlay h1 { font-size: 1.125rem; }
+  .dash-banner-overlay p { font-size: 0.8125rem; }
   .stats-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-3); }
   .stat-value { font-size: 1.5rem; }
   .testimonial-wall { grid-template-columns: minmax(0, 1fr); }
@@ -393,15 +434,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 <div class="bg-facets" aria-hidden="true"></div>
 
 <section class="view is-active" id="view-gate">
+  <button type="button" class="gate-adm-icon" onclick="handleAdmClick()" aria-label="Área administrativa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+  </button>
   <main class="gate-shell">
     <div class="gate-content">
       <div>
         <img src="logo.png" alt="Marmovidro" class="logo-img">
-        <p class="gate-tagline">Sofisticação em cada detalhe. Escolha uma opção para continuar.</p>
+        <p class="gate-tagline">Sofisticação em cada detalhe.</p>
       </div>
       <div class="gate-buttons">
         <button type="button" class="btn btn-primary btn-gate-primary" onclick="showView('home')">Avaliar Serviço</button>
-        <button type="button" class="btn-gate-adm" onclick="handleAdmClick()">ADM</button>
+        <button type="button" class="btn-gate-secondary" id="gate-whatsapp-btn">Falar com a empresa</button>
       </div>
     </div>
   </main>
@@ -685,9 +729,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         <ul class="nav-list">
           <li><button class="nav-link is-active" id="tab-btn-dashboard" onclick="switchAdminTab('dashboard')"><span class="dot"></span><span class="label">Dashboard</span></button></li>
           <li><button class="nav-link" id="tab-btn-avaliacoes" onclick="switchAdminTab('avaliacoes')"><span class="dot"></span><span class="label">Avaliações</span></button></li>
-          <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Clientes</span></button></li>
+          <li><button class="nav-link" id="tab-btn-clientes" onclick="switchAdminTab('clientes')"><span class="dot"></span><span class="label">Clientes</span></button></li>
           <li><button class="nav-link" id="tab-btn-relatorios" onclick="switchAdminTab('relatorios')"><span class="dot"></span><span class="label">Relatórios</span></button></li>
-          <li><button class="nav-link" disabled><span class="dot"></span><span class="label">Configurações</span></button></li>
+          <li><button class="nav-link" id="tab-btn-config" onclick="switchAdminTab('config')"><span class="dot"></span><span class="label">Configurações</span></button></li>
         </ul>
       </nav>
       <div class="sidebar-footer">
@@ -696,8 +740,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     </aside>
 
     <main class="main-content">
-      <div class="content-header">
-        <div><h1>Olá, Marmovidro</h1><p>Acompanhe a experiência dos seus clientes.</p></div>
+      <div class="dash-banner">
+        <img src="foto-banheiro-bancada.jpg" alt="">
+        <div class="dash-banner-overlay">
+          <h1>Olá, Marmovidro</h1>
+          <p>Acompanhe a experiência dos seus clientes.</p>
+        </div>
       </div>
 
       <div class="admin-tab is-active" id="admin-tab-dashboard">
@@ -742,13 +790,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
               <option value="without">Sem fotos</option>
             </select>
           </div>
-          <div style="overflow-x: auto;">
-            <table class="reviews-table">
-              <thead><tr><th>Cliente</th><th>Nota</th><th>Atendimento</th><th>Instalação</th><th>Qualidade</th><th>Data</th><th>Fotos</th><th>Ação</th></tr></thead>
-              <tbody id="reviews-tbody"></tbody>
-            </table>
-          </div>
-          <div class="reviews-cards" id="reviews-cards"></div>
+          <div class="admin-reviews-grid" id="admin-reviews-grid"></div>
+        </section>
+      </div>
+
+      <div class="admin-tab" id="admin-tab-clientes">
+        <section class="panel">
+          <h2 class="panel-title">Clientes</h2>
+          <p class="section-lead" style="margin-bottom: 16px; text-align: left;">Reunido automaticamente a partir das avaliações recebidas.</p>
+          <div id="clients-list"></div>
         </section>
       </div>
 
@@ -756,6 +806,29 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         <section class="panel">
           <h2 class="panel-title">Desempenho por categoria</h2>
           <div id="category-bars"></div>
+        </section>
+      </div>
+
+      <div class="admin-tab" id="admin-tab-config">
+        <section class="panel">
+          <h2 class="panel-title">Configurações</h2>
+          <div class="config-row">
+            <span class="config-label">Conta conectada</span>
+            <span class="config-value" id="config-email">–</span>
+          </div>
+          <div class="config-row">
+            <span class="config-label">WhatsApp do site</span>
+            <span class="config-value" id="config-whatsapp">–</span>
+          </div>
+          <div class="config-row">
+            <span class="config-label">Instagram</span>
+            <span class="config-value" id="config-instagram">–</span>
+          </div>
+          <div class="config-row">
+            <span class="config-label">E-mail de contato</span>
+            <span class="config-value" id="config-contact-email">–</span>
+          </div>
+          <p class="hint" style="margin-top: var(--space-4);">Esses dados ficam definidos diretamente no código do site por enquanto — fale com quem cuida do site pra alterar.</p>
         </section>
       </div>
     </main>
@@ -850,6 +923,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSocialIcons("home-social-row");
   renderSocialIcons("footer-social-row");
   document.getElementById("whatsapp-fab").href = buildWhatsappUrl();
+  document.getElementById("gate-whatsapp-btn").addEventListener("click", () => window.open(buildWhatsappUrl(), "_blank"));
   renderTestimonials();
 
   const io = new IntersectionObserver((entries) => {
@@ -864,7 +938,7 @@ function showView(name) {
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("is-active"));
   document.getElementById("view-" + name).classList.add("is-active");
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
-  if (name === "dashboard") refreshDashboard();
+  if (name === "dashboard") { switchAdminTab("dashboard"); refreshDashboard(); }
 }
 
 function switchAdminTab(name) {
@@ -907,6 +981,7 @@ async function loadReviews() {
     quality_score: r.quality_score,
     overall_score: Number(r.overall_score),
     comment: r.comment,
+    admin_reply: r.admin_reply,
     created_at: r.created_at.slice(0, 10),
     photos: (r.review_photos || []).map((p) => p.photo_url)
   }));
@@ -942,6 +1017,17 @@ async function createReview(reviewData) {
 async function deleteReview(id) {
   const { error } = await supabaseClient.from("reviews").delete().eq("id", id);
   if (error) console.error("Erro ao excluir avaliação:", error);
+}
+
+/* Resposta do dono/admin a uma avaliação — aparece publicamente no mural. */
+async function replyToReview(id, replyText) {
+  const { error } = await supabaseClient.from("reviews").update({ admin_reply: replyText }).eq("id", id);
+  if (error) {
+    console.error("Erro ao responder avaliação:", error);
+    showToast("Não foi possível salvar a resposta.");
+    return false;
+  }
+  return true;
 }
 
 function calculateAverages(reviews) {
@@ -1033,6 +1119,7 @@ async function renderTestimonials() {
         ${renderStars(r.overall_score)}
         <p class="testimonial-comment">${comment}</p>
         ${photosHtml}
+        ${r.admin_reply && r.admin_reply.trim() ? `<div class="admin-reply-box"><span class="reply-label">Resposta da Marmovidro</span><p>${r.admin_reply}</p></div>` : ""}
       </div>`;
   }).join("");
 
@@ -1300,8 +1387,6 @@ async function handleAdmClick() {
 }
 
 async function refreshDashboard() {
-  switchAdminTab("dashboard");
-
   const menuBtn = document.getElementById("mobile-menu-btn");
   const sidebar = document.getElementById("sidebar");
   const scrim = document.getElementById("sidebar-scrim");
@@ -1317,6 +1402,8 @@ async function refreshDashboard() {
   renderStats(allReviews);
   renderCategoryBars(allReviews);
   renderTable(filtered);
+  renderClients(allReviews);
+  renderConfig();
   initShareRow();
 
   const search = document.getElementById("search-input");
@@ -1376,43 +1463,116 @@ function renderCategoryBars(reviews) {
 }
 
 function renderTable(reviews) {
-  const tbody = document.getElementById("reviews-tbody");
-  const cardsWrap = document.getElementById("reviews-cards");
+  const grid = document.getElementById("admin-reviews-grid");
+  if (!grid) return;
+
   if (!reviews.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:32px; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</td></tr>`;
-    cardsWrap.innerHTML = `<p style="text-align:center; padding: 24px 0; color: var(--silver-500);">Nenhuma avaliação encontrada para este filtro.</p>`;
+    grid.innerHTML = `<p style="text-align:center; padding: 24px 0; color: var(--silver-500); grid-column: 1 / -1;">Nenhuma avaliação encontrada para este filtro.</p>`;
     return;
   }
-  tbody.innerHTML = reviews.map((r) => `
-    <tr>
-      <td>${r.customer_name}</td>
-      <td><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></td>
-      <td>${r.attendance_score}</td>
-      <td>${r.installation_score}</td>
-      <td>${r.quality_score}</td>
-      <td>${formatDate(r.created_at)}</td>
-      <td>${r.photos && r.photos.length ? r.photos.length + " foto" + (r.photos.length > 1 ? "s" : "") : "—"}</td>
-      <td>
-        <div class="row-actions">
-          <button type="button" class="btn-ghost" onclick="openReviewDetail('${r.id}')">Ver avaliação</button>
-          <button type="button" class="btn-ghost btn-danger" onclick="handleDeleteReview('${r.id}')">${TRASH_ICON_SVG} Excluir</button>
+
+  grid.innerHTML = reviews.map((r) => {
+    const photosHtml = r.photos && r.photos.length
+      ? `<div class="admin-review-photos">${r.photos.map((url, i) => `<img src="${url}" alt="Foto ${i + 1} enviada por ${r.customer_name}" onclick="openLightbox('${url}')">`).join("")}</div>`
+      : "";
+    const comment = r.comment && r.comment.trim() ? r.comment : "O cliente não deixou comentário.";
+    const replyBlock = r.admin_reply && r.admin_reply.trim()
+      ? `<div class="admin-reply-box"><span class="reply-label">Sua resposta</span><p>${r.admin_reply}</p>
+          <button type="button" class="btn-ghost" style="margin-top: var(--space-2);" onclick="toggleReplyForm('${r.id}')">Editar resposta</button>
+        </div>`
+      : `<button type="button" class="btn-ghost" onclick="toggleReplyForm('${r.id}')">Responder</button>`;
+
+    return `
+    <div class="admin-review-card">
+      <div class="testimonial-head">
+        <div>
+          <div class="testimonial-name">${r.customer_name}</div>
+          <div class="testimonial-date">${formatDate(r.created_at)}</div>
         </div>
-      </td>
-    </tr>`).join("");
-  cardsWrap.innerHTML = reviews.map((r) => `
-    <div class="review-card">
-      <div class="review-card-head"><strong>${r.customer_name}</strong><span class="score-pill">${r.overall_score.toFixed(1).replace(".", ",")}</span></div>
-      <div class="review-card-meta">
-        <div>Atendimento: <span>${r.attendance_score}</span></div>
-        <div>Instalação: <span>${r.installation_score}</span></div>
-        <div>Qualidade: <span>${r.quality_score}</span></div>
-        <div>Data: <span>${formatDate(r.created_at)}</span></div>
+        <span class="testimonial-score">${r.overall_score.toFixed(1).replace(".", ",")}</span>
       </div>
-      <div class="row-actions">
-        <button type="button" class="btn-ghost" style="flex:1;" onclick="openReviewDetail('${r.id}')">Ver avaliação</button>
-        <button type="button" class="btn-ghost btn-danger" style="flex:1;" onclick="handleDeleteReview('${r.id}')">${TRASH_ICON_SVG} Excluir</button>
+      ${renderStars(r.overall_score)}
+      <p class="admin-review-comment">${comment}</p>
+      ${photosHtml}
+      <div class="admin-review-actions">
+        <button type="button" class="btn-ghost" onclick="openReviewDetail('${r.id}')">Ver detalhes</button>
+        <button type="button" class="btn-ghost btn-danger" onclick="handleDeleteReview('${r.id}')">${TRASH_ICON_SVG} Excluir</button>
       </div>
-    </div>`).join("");
+      ${replyBlock}
+      <div class="admin-reply-form" id="reply-form-${r.id}" style="display:none;">
+        <textarea id="reply-input-${r.id}" placeholder="Escreva sua resposta pra esse cliente...">${r.admin_reply || ""}</textarea>
+        <button type="button" class="btn-ghost" onclick="submitReply('${r.id}')">Salvar resposta</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleReplyForm(id) {
+  const form = document.getElementById("reply-form-" + id);
+  if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+}
+
+async function submitReply(id) {
+  const input = document.getElementById("reply-input-" + id);
+  const text = input.value.trim();
+  if (!text) return;
+  const ok = await replyToReview(id, text);
+  if (ok) {
+    showToast("Resposta salva!");
+    refreshDashboard();
+    renderTestimonials();
+  }
+}
+
+function aggregateClients(reviews) {
+  const map = new Map();
+  reviews.forEach((r) => {
+    const key = r.customer_name.trim().toLowerCase();
+    if (!map.has(key)) {
+      map.set(key, { name: r.customer_name, phone: r.customer_phone, count: 0, sum: 0 });
+    }
+    const c = map.get(key);
+    c.count += 1;
+    c.sum += r.overall_score;
+    if (r.customer_phone && !c.phone) c.phone = r.customer_phone;
+  });
+  return Array.from(map.values())
+    .map((c) => ({ ...c, avg: Math.round((c.sum / c.count) * 10) / 10 }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function renderClients(reviews) {
+  const wrap = document.getElementById("clients-list");
+  if (!wrap) return;
+  const clients = aggregateClients(reviews);
+  if (!clients.length) {
+    wrap.innerHTML = `<p style="text-align:center; padding: 24px 0; color: var(--silver-500);">Nenhum cliente ainda.</p>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="clients-table">
+        <thead><tr><th>Cliente</th><th>Telefone</th><th>Avaliações</th><th>Nota média</th></tr></thead>
+        <tbody>
+          ${clients.map((c) => `
+            <tr>
+              <td>${c.name}</td>
+              <td>${c.phone || "—"}</td>
+              <td>${c.count}</td>
+              <td><span class="score-pill">${c.avg.toFixed(1).replace(".", ",")}</span></td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function renderConfig() {
+  const { data } = await supabaseClient.auth.getSession();
+  const email = data.session ? data.session.user.email : "—";
+  document.getElementById("config-email").textContent = email;
+  document.getElementById("config-whatsapp").textContent = "+" + MARMOVIDRO_LINKS.whatsappNumber;
+  document.getElementById("config-instagram").textContent = MARMOVIDRO_LINKS.instagram;
+  document.getElementById("config-contact-email").textContent = MARMOVIDRO_LINKS.email;
 }
 
 function initShareRow() {
